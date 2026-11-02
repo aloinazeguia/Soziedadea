@@ -23,3 +23,5 @@ obj/
 *.db-wal
 # binario autocontenido para probar en la VM de Windows
 AppTpv/ClienteWPF/publish_vm/
+AppTpv/ClienteWPF/publish_vm_x64/
+AppTpv-cliente-win.zip
