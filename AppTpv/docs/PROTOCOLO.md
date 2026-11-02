@@ -1,7 +1,7 @@
 # Protocolo TCP — AppTpv (Fase 2)
 
 ## Conexión
-- `TcpListener` en **puerto 5000**.
+- `TcpListener` en **puerto 5001**.
 - El servidor acepta hasta **10 clientes simultáneos** (enunciado).
   Cliente 11 → recibe error `SESSION_LIMIT` y cierra.
 - **Un hilo por cliente** (lectura bloqueante), la UI del cliente no se

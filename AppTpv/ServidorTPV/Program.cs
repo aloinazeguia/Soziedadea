@@ -1,14 +1,28 @@
 ﻿// ============================================================
-//  ServidorTPV — Fase 1 (probar BD): crea/verifica la BD SQLite y sale.
-//  Fase 2 (proxima parada): servidor TCP + sesiones + lock de escrituras.
+//  ServidorTPV — Fase 2 (servidor TCP funcionando)
+//  Arranca la BD y sirve a los clientes por el puerto 5000.
+//  Escribe "parar" + Enter para terminar limpio (Ctrl+C tambien).
 // ============================================================
 using ServidorTPV.Data;
+using ServidorTPV.Red;
 
-Console.WriteLine("=== ServidorTPV ===");
-Console.WriteLine($"BD en: {BaseDatos.RutaBD}");
+Console.WriteLine("=== ServidorTPV (Fase 2: TCP) ===");
 
 BaseDatos.Inicializar();
-
 var (resumen, _) = BaseDatos.Verificar();
 Console.WriteLine($"BD OK -> {resumen}");
-Console.WriteLine("(Fase 1 completada: la cerramos por consola. Fase 2: TCP ajo)");
+
+var servidor = new Thread(ServidorTCP.Instancia.Arrancar)
+{ IsBackground = true };
+servidor.Start();
+
+Console.WriteLine("Server running. Escribe 'parar' para cerrar.");
+while (true)
+{
+    var linea = Console.ReadLine();
+    if (linea != null && linea.Trim().ToLower() == "parar")
+    {
+        Console.WriteLine("Cerrando servidor...");
+        Environment.Exit(0);
+    }
+}

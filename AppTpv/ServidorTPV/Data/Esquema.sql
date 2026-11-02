@@ -59,8 +59,8 @@ CREATE TABLE IF NOT EXISTS Reserva (
     observaciones    TEXT,
     estado           TEXT    NOT NULL DEFAULT 'activa'
                      CHECK (estado IN ('activa', 'cancelada')),
-    FOREIGN KEY (idMesa)    REFERENCES Mesa(idMesa),
-    FOREIGN KEY (idUsuario) REFERENCES Usuario(idUsuario)
+    FOREIGN KEY (idMesa)    REFERENCES Mesa(id),
+    FOREIGN KEY (idUsuario) REFERENCES Usuario(id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_reserva_fecha_turno ON Reserva(fecha, turno);
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS Pedido (
     estado       TEXT    NOT NULL DEFAULT 'abierta'
                          CHECK (estado IN ('abierta', 'cobrada', 'anulada')),
     total        REAL    NOT NULL DEFAULT 0,
-    FOREIGN KEY (idUsuario) REFERENCES Usuario(idUsuario)
+    FOREIGN KEY (idUsuario) REFERENCES Usuario(id)
 );
 
 CREATE TABLE IF NOT EXISTS LineaPedido (
