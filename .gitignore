@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+
+# Node.js
+**/node_modules/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Generated output
+dist/
+coverage/
+
+# .NET build artifacts
+bin/
+obj/
+
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
