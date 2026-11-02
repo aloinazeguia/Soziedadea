@@ -1,0 +1,39 @@
+<!-- ============================================================
+  AppTpv — Ventana principal: aloja las interfaces 2 a 5
+    2. Consumiciones (comandero del TPV, todo usuario)
+    3. Reservas (todo usuario)
+    4. Administracion de usuarios (solo admin)
+    5. Administracion de stock/carta (solo admin)
+============================================================ -->
+<Window x:Class="ClienteWPF.Ventanas.VentanaPrincipal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vistas="clr-namespace:ClienteWPF.Vistas"
+        Title="AppTpv" Height="640" Width="960"
+        WindowStartupLocation="CenterScreen">
+    <DockPanel>
+        <!-- barra superior con la identidad del usuario -->
+        <Border DockPanel.Dock="Top" Background="#EEEEEE" Padding="10,6">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" x:Name="BtnSalir" Content="Cerrar sesion"
+                        Click="BtnSalir_Click" Width="110"/>
+                <TextBlock x:Name="TxtQuien" FontWeight="Bold" VerticalAlignment="Center"/>
+            </DockPanel>
+        </Border>
+
+        <TabControl x:Name="Fichas">
+            <TabItem Header="Consumiciones">
+                <vistas:VistaConsumiciones/>
+            </TabItem>
+            <TabItem Header="Reservas">
+                <vistas:VistaReservas/>
+            </TabItem>
+            <TabItem Header="Usuarios">
+                <vistas:VistaUsuarios/>
+            </TabItem>
+            <TabItem Header="Stock">
+                <vistas:VistaStock/>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>

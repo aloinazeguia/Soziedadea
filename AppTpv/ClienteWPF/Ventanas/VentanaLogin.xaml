@@ -1,0 +1,46 @@
+<!-- ============================================================
+  AppTpv — Interfaz 1 de 5: LOGIN
+  Autenticacion contra el servidor TCP; segun el rol se abren
+  pestanas distintas en la ventana principal.
+============================================================ -->
+<Window x:Class="ClienteWPF.Ventanas.VentanaLogin"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="AppTpv — Inicio de sesion" Height="310" Width="420"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <Grid Margin="24">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="140"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Sociedad gastronomica — TPV"
+                   FontSize="18" FontWeight="Bold" HorizontalAlignment="Center"/>
+        <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="Introduce tus credenciales de usuario"
+                   Foreground="Gray" HorizontalAlignment="Center" Margin="0,4,0,16"/>
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Usuario:" VerticalAlignment="Center"/>
+        <TextBox  Grid.Row="2" Grid.Column="1" x:Name="TxtLogin"
+                  Height="26" Margin="0,0,0,8"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Contrasena:" VerticalAlignment="Center"/>
+        <PasswordBox Grid.Row="3" Grid.Column="1" x:Name="TxtPass"
+                     Height="26" Margin="0,0,0,14"/>
+
+        <Button Grid.Row="4" Grid.ColumnSpan="2" x:Name="BtnEntrar" Content="Entrar"
+                Height="30" Background="#2E7D32" Foreground="White"
+                Click="BtnEntrar_Click" IsDefault="True"/>
+
+        <TextBlock Grid.Row="5" Grid.ColumnSpan="2" x:Name="TxtError" Foreground="Red"
+                   TextWrapping="Wrap" Text=""
+                   HorizontalAlignment="Center" Margin="0,10,0,0"/>
+    </Grid>
+</Window>

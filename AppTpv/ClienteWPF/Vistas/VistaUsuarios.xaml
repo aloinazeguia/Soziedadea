@@ -1,0 +1,64 @@
+<!-- ============================================================
+  AppTpv — Interfaz 4 de 5: ADMINISTRACION DE USUARIOS
+  Solo visible para el rol admin (requisito 2): crear usuarios,
+  cambiar contrasena/nombre/rol y deshabilitar.
+============================================================ -->
+<UserControl x:Class="ClienteWPF.Vistas.VistaUsuarios"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+            <TextBlock Text="Gestion de usuarios" FontSize="15"
+                       FontWeight="Bold" Margin="0,0,0,10"/>
+
+            <TextBlock Text="Login:"/>
+            <TextBox x:Name="TxtLogin" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Contrasena:"/>
+            <PasswordBox x:Name="TxtPass" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Nombre:"/>
+            <TextBox x:Name="TxtNombre" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Rol:"/>
+            <ComboBox x:Name="CboRol" SelectedIndex="1" Margin="0,2,0,10">
+                <ComboBoxItem Content="admin"/>
+                <ComboBoxItem Content="usuario"/>
+            </ComboBox>
+
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="BtnCrear" Content="Crear" Width="90" Margin="0,0,6,0"
+                        Background="#2E7D32" Foreground="White" Click="BtnCrear_Click"/>
+                <Button x:Name="BtnGuardar" Content="Guardar cambios" Width="130" Margin="0,0,6,0"
+                        Click="BtnGuardar_Click"/>
+                <Button x:Name="BtnBorrar" Content="Deshabilitar" Width="100"
+                        Click="BtnBorrar_Click"/>
+            </StackPanel>
+            <TextBlock x:Name="TxtAviso" Foreground="Red" TextWrapping="Wrap" Margin="0,8,0,0"/>
+        </StackPanel>
+
+        <DockPanel Grid.Column="1">
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Text="Usuarios del sistema" FontSize="15" FontWeight="Bold"
+                           VerticalAlignment="Center"/>
+                <Button x:Name="BtnRefrescar" Content="Refrescar" Width="90" Margin="12,0,0,0"
+                        Click="BtnRefrescar_Click"/>
+            </StackPanel>
+            <DataGrid x:Name="GridUsuarios" AutoGenerateColumns="False" IsReadOnly="True"
+                      SelectionChanged="GridUsuarios_SelectionChanged">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="id" Binding="{Binding Id}" Width="40"/>
+                    <DataGridTextColumn Header="login" Binding="{Binding Login}" Width="120"/>
+                    <DataGridTextColumn Header="nombre" Binding="{Binding Nombre}" Width="*"/>
+                    <DataGridTextColumn Header="rol" Binding="{Binding Rol}" Width="80"/>
+                    <DataGridTextColumn Header="activo" Binding="{Binding Activo}" Width="50"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+    </Grid>
+</UserControl>

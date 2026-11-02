@@ -1,0 +1,74 @@
+<!-- ============================================================
+  AppTpv — Interfaz 5 de 5: ADMINISTRACION DE STOCK/CARTA
+  Solo admin: CRUD de productos y ajuste directo de stock
+  (requisito 1.3). Visible ingredientes (osagaiak) siempre.
+============================================================ -->
+<UserControl x:Class="ClienteWPF.Vistas.VistaStock"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+            <TextBlock Text="Carta y almacen" FontSize="15"
+                       FontWeight="Bold" Margin="0,0,0,10"/>
+
+            <TextBlock Text="Nombre del producto:"/>
+            <TextBox x:Name="TxtNombre" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Precio (€):"/>
+            <TextBox x:Name="TxtPrecio" Text="0" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Stock:"/>
+            <TextBox x:Name="TxtStock" Text="0" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Ingredientes (osagaiak, separados por coma):"/>
+            <TextBox x:Name="TxtIngredientes" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Categoria:"/>
+            <TextBox x:Name="TxtCategoria" Text="general" Margin="0,2,0,10"/>
+
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="BtnCrear" Content="Crear" Width="90" Margin="0,0,6,0"
+                        Background="#2E7D32" Foreground="White" Click="BtnCrear_Click"/>
+                <Button x:Name="BtnGuardar" Content="Guardar cambios" Width="120" Margin="0,0,6,0"
+                        Click="BtnGuardar_Click"/>
+                <Button x:Name="BtnBorrar" Content="Quitar" Width="80"
+                        Click="BtnBorrar_Click"/>
+            </StackPanel>
+
+            <TextBlock Text="Ajuste rapido de stock" FontWeight="Bold" Margin="0,14,0,4"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBox x:Name="TxtNuevoStock" Width="70"/>
+                <Button x:Name="BtnStock" Content="Poner stock" Width="100" Margin="8,0,0,0"
+                        Click="BtnStock_Click"/>
+            </StackPanel>
+
+            <TextBlock x:Name="TxtAviso" Foreground="Red" TextWrapping="Wrap" Margin="0,8,0,0"/>
+        </StackPanel>
+
+        <DockPanel Grid.Column="1">
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Text="Productos" FontSize="15" FontWeight="Bold"
+                           VerticalAlignment="Center"/>
+                <Button x:Name="BtnRefrescar" Content="Refrescar" Width="90" Margin="12,0,0,0"
+                        Click="BtnRefrescar_Click"/>
+            </StackPanel>
+            <DataGrid x:Name="GridProductos" AutoGenerateColumns="False" IsReadOnly="True"
+                      SelectionChanged="GridProductos_SelectionChanged">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="id" Binding="{Binding Id}" Width="40"/>
+                    <DataGridTextColumn Header="nombre" Binding="{Binding Nombre}" Width="140"/>
+                    <DataGridTextColumn Header="precio" Binding="{Binding Precio}" Width="70"/>
+                    <DataGridTextColumn Header="stock" Binding="{Binding Stock}" Width="60"/>
+                    <DataGridTextColumn Header="ingredientes" Binding="{Binding Ingredientes}" Width="*"/>
+                    <DataGridTextColumn Header="categoria" Binding="{Binding Categoria}" Width="90"/>
+                    <DataGridTextColumn Header="activo" Binding="{Binding Activo}" Width="50"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+    </Grid>
+</UserControl>

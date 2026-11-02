@@ -1,0 +1,88 @@
+<!-- ============================================================
+  AppTpv — Interfaz 2 de 5: CONSUMICIONES (comandero del TPV)
+  Izquierda: carta con stock visible (aviso de agotado).
+  Derecha: pedido abierto, lineas, total, confirmar/cancelar.
+============================================================ -->
+<UserControl x:Class="ClienteWPF.Vistas.VistaConsumiciones"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- CARTA -->
+        <DockPanel Grid.Column="0" Margin="0,0,8,0">
+            <TextBlock DockPanel.Dock="Top" Text="Carta de la sociedad"
+                       FontSize="15" FontWeight="Bold" Margin="0,0,0,6"/>
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,8,0,0">
+                <Button x:Name="BtnAnadir" Content="Anadir al pedido" Width="130"
+                        Click="BtnAnadir_Click"/>
+                <TextBlock x:Name="TxtCartaInfo" Foreground="Gray" Margin="10,0,0,0"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+            <ListBox x:Name="ListaCarta" SelectionMode="Single">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" Margin="2">
+                            <TextBlock Text="{Binding Nombre}" FontWeight="Bold" Width="150"/>
+                            <TextBlock Text="{Binding Precio, StringFormat={}{0:C2}}" Width="60"/>
+                            <TextBlock Text="{Binding Ingredientes}"
+                                       Foreground="Gray" Margin="0,0,10,0"/>
+                            <TextBlock Width="80">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="{Binding Stock, StringFormat=en stock: {0}}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Agotado}" Value="True">
+                                                <Setter Property="Text" Value="AGOTADO"/>
+                                                <Setter Property="Foreground" Value="Red"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
+
+        <!-- PEDIDO -->
+        <DockPanel Grid.Column="1" Margin="8,0,0,0">
+            <TextBlock DockPanel.Dock="Top" x:Name="TxtPedidoTitulo"
+                       Text="Pedido (aun no abierto)"
+                       FontSize="15" FontWeight="Bold" Margin="0,0,0,6"/>
+            <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="TOTAL: " FontWeight="Bold" FontSize="14"/>
+                    <TextBlock x:Name="TxtTotal" Text="0,00 €" FontWeight="Bold" FontSize="14"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <Button x:Name="BtnAbrir" Content="Abrir pedido" Width="110"
+                            Click="BtnAbrir_Click"/>
+                    <Button x:Name="BtnQuitar" Content="Quitar linea" Width="110" Margin="6,0,0,0"
+                            Click="BtnQuitar_Click"/>
+                    <Button x:Name="BtnConfirmar" Content="Confirmar compra" Width="130" Margin="6,0,0,0"
+                            Background="#2E7D32" Foreground="White" Click="BtnConfirmar_Click"/>
+                    <Button x:Name="BtnTicket" Content="Ver ticket" Width="90" Margin="6,0,0,0"
+                            Click="BtnTicket_Click"/>
+                </StackPanel>
+            </StackPanel>
+            <ListBox x:Name="ListaLineas">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Nombre}" FontWeight="Bold" Width="170"/>
+                            <TextBlock Text="{Binding Cantidad, StringFormat=x{0}}" Width="50"/>
+                            <TextBlock Text="{Binding PrecioUnitario, StringFormat={}{0:C2}}" Width="70"/>
+                            <TextBlock Text="{Binding Importe, StringFormat={}{0:C2}}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
+    </Grid>
+</UserControl>
