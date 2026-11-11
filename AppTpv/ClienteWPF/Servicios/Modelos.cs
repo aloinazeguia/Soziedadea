@@ -57,3 +57,20 @@ public class LineaVista
 
     public double Importe => Math.Round(Cantidad * PrecioUnitario, 2);
 }
+
+/// <summary>
+/// Linea del comandero. Se mantiene en memoria mientras el camarero
+/// prepara el pedido: "pendiente" (aun no enviada al servidor) o
+/// "enviado" (ya es una LineaPedido firme de la comanda abierta).
+/// </summary>
+public class LineaPedidoVista
+{
+    public int IdProducto { get; set; }
+    public string Nombre { get; set; } = "";
+    public int Cantidad { get; set; }
+    public double PrecioUnitario { get; set; }
+    public string Estado { get; set; } = "pendiente";   // pendiente | enviado
+
+    public bool Enviada => Estado == "enviado";
+    public double Importe => Math.Round(Cantidad * PrecioUnitario, 2);
+}
