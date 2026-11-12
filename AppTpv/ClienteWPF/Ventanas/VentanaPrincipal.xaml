@@ -9,7 +9,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vistas="clr-namespace:ClienteWPF.Vistas"
-        Title="AppTpv" Height="640" Width="960"
+        Title="AppTpv" Height="800" Width="1280"
+        MinHeight="640" MinWidth="1024"
         WindowStartupLocation="CenterScreen">
     <DockPanel>
         <!-- barra superior con la identidad del usuario -->
