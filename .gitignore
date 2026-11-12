@@ -25,3 +25,5 @@ obj/
 AppTpv/ClienteWPF/publish_vm/
 AppTpv/ClienteWPF/publish_vm_x64/
 AppTpv-cliente-win.zip
+
+.vs/slnx.sqlite
