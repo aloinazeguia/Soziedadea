@@ -157,7 +157,7 @@
 
         <!-- ============ CATEGORIAS ============ -->
         <DockPanel Grid.Column="0" Background="#2E3440">
-            <TextBlock DockPanel.Dock="Top" Text="CATEGORIAS"
+            <TextBlock DockPanel.Dock="Top" Text="KATEGORIAK"
                        Foreground="White" FontSize="20" FontWeight="Bold"
                        HorizontalAlignment="Center" Margin="10,20,10,0"/>
             <Border DockPanel.Dock="Top" Height="1" Background="White"
@@ -171,7 +171,7 @@
         <!-- ============ PRODUCTOS ============ -->
         <DockPanel Grid.Column="1" Background="White">
             <TextBlock DockPanel.Dock="Top" x:Name="TxtCategoriaTitulo"
-                       Text="PRODUCTOS" FontSize="18" FontWeight="Bold"
+                       Text="PRODUKTUAK" FontSize="18" FontWeight="Bold"
                        Foreground="#2E3440" Margin="22,18,22,0"/>
             <TextBlock DockPanel.Dock="Bottom" x:Name="TxtCartaInfo"
                        Foreground="Gray" FontSize="12" TextWrapping="Wrap"
@@ -201,11 +201,11 @@
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="Text"
-                                                        Value="{Binding Stock, StringFormat=stock: {0}}"/>
+                                                        Value="{Binding Stock, StringFormat=izakinak: {0}}"/>
                                                 <Setter Property="Foreground" Value="#777777"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding Agotado}" Value="True">
-                                                        <Setter Property="Text" Value="AGOTADO"/>
+                                                        <Setter Property="Text" Value="AGORTUTA"/>
                                                         <Setter Property="Foreground" Value="Red"/>
                                                         <Setter Property="FontWeight" Value="Bold"/>
                                                     </DataTrigger>
@@ -238,18 +238,18 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Button x:Name="BtnEnviar" Grid.Column="0" Content="Enviar"
+                <Button x:Name="BtnEnviar" Grid.Column="0" Content="Bidali"
                         HorizontalAlignment="Stretch" Margin="0,0,24,0"
                         Height="48" FontSize="18"
                         Style="{StaticResource BotonComandero}"
                         Background="#6FC16E" Click="BtnEnviar_Click"/>
                 <Border Grid.Column="1" BorderThickness="0,0,0,1" BorderBrush="White"
                         Padding="0,0,0,10" VerticalAlignment="Center">
-                    <TextBlock Text="PEDIDO" Foreground="White"
+                    <TextBlock Text="ESKAERA" Foreground="White"
                                FontSize="24" FontWeight="Bold"/>
                 </Border>
             </Grid>
-            <TextBlock x:Name="TxtEstadoPedido" Grid.Row="1" Text="sin pedido abierto"
+            <TextBlock x:Name="TxtEstadoPedido" Grid.Row="1" Text="Ez dago eskaera irekirik"
                        Foreground="#B8BFC9" FontSize="11"
                        HorizontalAlignment="Center" Margin="20,8,20,0"/>
 
@@ -303,10 +303,10 @@
                              VerticalContentAlignment="Center" TextAlignment="Center"
                              FontSize="16" FontWeight="Bold"
                              BorderThickness="0"/>
-                    <Button Content="Guardar" Margin="10,0,0,0"
+                    <Button Content="Gorde" Margin="10,0,0,0"
                             Style="{StaticResource BotonEditor}"
                             Click="BtnGuardarLinea_Click"/>
-                    <Button Content="Eliminar" Margin="10,0,0,0"
+                    <Button Content="Ezabatu" Margin="10,0,0,0"
                             Style="{StaticResource BotonEditor}"
                             Click="BtnEliminarLinea_Click"/>
                 </StackPanel>
@@ -316,7 +316,7 @@
             <Border Grid.Row="4" Background="#C76D3A" CornerRadius="5"
                     Padding="10" Margin="20,10,20,0">
                 <Grid>
-                    <TextBlock Text="TOTAL:" Foreground="White" FontWeight="Bold"
+                    <TextBlock Text="GUZTIRA:" Foreground="White" FontWeight="Bold"
                                FontSize="16"/>
                     <TextBlock x:Name="TxtTotal" Text="0.00 €" Foreground="White"
                                FontWeight="Bold" FontSize="16"
@@ -326,13 +326,13 @@
 
             <!-- Botones -->
             <StackPanel Grid.Row="5" Margin="20,10,20,20">
-                <Button x:Name="BtnSubtotal" Content="SUBTOTAL"
+                <Button x:Name="BtnSubtotal" Content="AZPITOTALA"
                         Style="{StaticResource BotonComandero}"
                         Click="BtnSubtotal_Click"/>
-                <Button x:Name="BtnCobrar" Content="COBRAR" Margin="0,8,0,0"
+                <Button x:Name="BtnCobrar" Content="KOBRATU" Margin="0,8,0,0"
                         Style="{StaticResource BotonComandero}"
                         Click="BtnCobrar_Click"/>
-                <Button x:Name="BtnTicket" Content="VER TICKET" Margin="0,8,0,0"
+                <Button x:Name="BtnTicket" Content="IKUSI TIKETA" Margin="0,8,0,0"
                         Height="30" FontSize="12"
                         Style="{StaticResource BotonComandero}"
                         Click="BtnTicket_Click"/>

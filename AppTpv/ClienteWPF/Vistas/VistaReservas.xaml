@@ -15,37 +15,37 @@
 
         <!-- FORM -->
         <StackPanel Grid.Column="0" Margin="0,0,10,0">
-            <TextBlock Text="Nueva / modificar reserva" FontSize="15"
+            <TextBlock Text="Erreserba berria / aldatu" FontSize="15"
                        FontWeight="Bold" Margin="0,0,0,10"/>
 
-            <TextBlock Text="Mesa:"/>
+            <TextBlock Text="Mahaia:"/>
             <ComboBox x:Name="CboMesa" Margin="0,2,0,10"
                       DisplayMemberPath="Descripcion" SelectedValuePath="Id"/>
 
-            <TextBlock Text="Turno (bazkaria / afaria):"/>
+            <TextBlock Text="Txanda:"/>
             <ComboBox x:Name="CboTurno" Margin="0,2,0,10" SelectedIndex="0">
                 <ComboBoxItem Content="bazkaria"/>
                 <ComboBoxItem Content="afaria"/>
             </ComboBox>
 
-            <TextBlock Text="Numero de comensales:"/>
+            <TextBlock Text="Pertsona kopurua:"/>
             <TextBox x:Name="TxtComensales" Text="2" Margin="0,2,0,10"/>
 
-            <TextBlock Text="Fecha (YYYY-MM-DD, vacio = sin fecha):"/>
+            <TextBlock Text="Data (YYYY-MM-DD; hutsik = datarik gabe):"/>
             <TextBox x:Name="TxtFecha" Margin="0,2,0,10"/>
 
-            <TextBlock Text="Nombre del cliente:"/>
+            <TextBlock Text="Bezeroaren izena:"/>
             <TextBox x:Name="TxtCliente" Margin="0,2,0,10"/>
 
-            <TextBlock Text="Observaciones (opcional):"/>
+            <TextBlock Text="Oharrak (aukerakoa):"/>
             <TextBox x:Name="TxtObservaciones" Margin="0,2,0,10"/>
 
             <StackPanel Orientation="Horizontal">
-                <Button x:Name="BtnCrear" Content="Crear" Width="90"
+                <Button x:Name="BtnCrear" Content="Sortu" Width="90"
                         Background="#2E7D32" Foreground="White" Click="BtnCrear_Click"/>
-                <Button x:Name="BtnModificar" Content="Modificar" Width="90" Margin="6,0,0,0"
+                <Button x:Name="BtnModificar" Content="Aldatu" Width="90" Margin="6,0,0,0"
                         Click="BtnModificar_Click"/>
-                <Button x:Name="BtnBorrar" Content="Cancelar reserva" Width="110" Margin="6,0,0,0"
+                <Button x:Name="BtnBorrar" Content="Utzi erreserba" Width="110" Margin="6,0,0,0"
                         Click="BtnBorrar_Click"/>
             </StackPanel>
             <TextBlock x:Name="TxtAviso" Foreground="Red" TextWrapping="Wrap" Margin="0,8,0,0"/>
@@ -54,23 +54,23 @@
         <!-- LISTA -->
         <DockPanel Grid.Column="1">
             <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
-                <TextBlock Text="Reservas activas" FontSize="15" FontWeight="Bold"
+                <TextBlock Text="Erreserba aktiboak" FontSize="15" FontWeight="Bold"
                            VerticalAlignment="Center"/>
-                <TextBlock Text="  filtro fecha (vacio = todas): " VerticalAlignment="Center"/>
+                <TextBlock Text="  data-iragazkia (hutsik = guztiak): " VerticalAlignment="Center"/>
                 <TextBox x:Name="TxtFiltroFecha" Width="100"/>
-                <Button x:Name="BtnRefrescar" Content="Refrescar" Width="90" Margin="8,0,0,0"
+                <Button x:Name="BtnRefrescar" Content="Eguneratu" Width="90" Margin="8,0,0,0"
                         Click="BtnRefrescar_Click"/>
             </StackPanel>
             <DataGrid x:Name="GridReservas" AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionChanged="GridReservas_SelectionChanged">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="id" Binding="{Binding IdReserva}" Width="40"/>
-                    <DataGridTextColumn Header="mesa" Binding="{Binding NumMesa}" Width="50"/>
-                    <DataGridTextColumn Header="fecha" Binding="{Binding Fecha}" Width="100"/>
-                    <DataGridTextColumn Header="turno" Binding="{Binding Turno}" Width="80"/>
-                    <DataGridTextColumn Header="comensales" Binding="{Binding NumComensales}" Width="80"/>
-                    <DataGridTextColumn Header="cliente" Binding="{Binding NombreCliente}" Width="*"/>
-                    <DataGridTextColumn Header="observaciones" Binding="{Binding Observaciones}" Width="150"/>
+                    <DataGridTextColumn Header="ID" Binding="{Binding IdReserva}" Width="40"/>
+                    <DataGridTextColumn Header="Mahaia" Binding="{Binding NumMesa}" Width="60"/>
+                    <DataGridTextColumn Header="Data" Binding="{Binding FechaErakutsi}" Width="110"/>
+                    <DataGridTextColumn Header="Txanda" Binding="{Binding Turno}" Width="80"/>
+                    <DataGridTextColumn Header="Pertsonak" Binding="{Binding NumComensales}" Width="80"/>
+                    <DataGridTextColumn Header="Bezeroa" Binding="{Binding NombreCliente}" Width="*"/>
+                    <DataGridTextColumn Header="Oharrak" Binding="{Binding Observaciones}" Width="150"/>
                 </DataGrid.Columns>
             </DataGrid>
         </DockPanel>

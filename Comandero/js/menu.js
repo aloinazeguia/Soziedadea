@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     if (!datosMesa) {
-        message = 'No se han encontrado datos de la mesa. Por favor, vuelve a la página anterior.';
+        message = 'Ez da mahaiaren daturik aurkitu. Itzuli aurreko orrira.';
         redirection = "../../Salas_/sala1.html";
         AlertMessage(message,redirection);
     }
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
 
             if (!mesaId) {
-               message = 'No se ha seleccionado ninguna mesa.';
+               message = 'Ez da mahairik aukeratu.';
                redirection = "../../Salas_/sala1.html";
                AlertMessage(message,redirection);
                     return;
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
      
 
             if (!pedidoGuardado) {
-            message = 'No hay productos en el pedido.';
+            message = 'Ez dago produkturik eskaeran.';
             AlertMessage(message);
             return;
             }
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // No hay comanda abierta, crea una nueva
 
                 await crearComanda(mesaId);
-                document.getElementById("boton-esperar").textContent = "Cargando...";
+                document.getElementById("boton-esperar").textContent = "Kargatzen...";
                 await new Promise(resolve =>setTimeout(resolve, 500));
                 
                 const comandasAbiertas = await obtenerComandasAbiertas(mesaId);
@@ -126,11 +126,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     comandaReciente.comandaId ||
                     null;
             }
-            document.getElementById("boton-esperar").textContent = "Enviar";
+            document.getElementById("boton-esperar").textContent = "Bidali";
 
 
             if (!idComanda) {
-               message = 'No se pudo obtener el id de la comanda.';
+               message = 'Ezin izan da eskaeraren IDa eskuratu.';
                AlertMessage(message);
                return;
             }
@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
             if (detalles.length === 0) {
-               message = 'No hay productos nuevos para enviar.';
+               message = 'Ez dago bidaltzeko produktu berririk.';
                AlertMessage(message);
                return;
             }
@@ -200,12 +200,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
             if (!resDetalle.ok || dataDetalle.ok === false) {
-                message = 'Error al insertar detalle de comanda: ' + (dataDetalle.status || '');
+                message = 'Errorea eskaeraren xehetasunak sartzean: ' + (dataDetalle.status || '');
                 AlertMessage(message);
                 return;
             }
 
-                message = 'Comanda enviada correctamente';
+                message = 'Eskaera behar bezala bidali da.';
                 redirection = '../../Salas_/sala1.html';
                 AlertMessage(message, redirection);
             // Limpia el pedido y vuelve a la sala
@@ -274,7 +274,7 @@ function mostrarSubCategorias(subcategorias) {
     container.innerHTML = ''; // Limpiar resultados previos
 
     if (subcategorias.length === 0) {
-        container.innerHTML = 'No se encontraron subcategorías.';
+        container.innerHTML = 'Ez da azpikategoriarik aurkitu.';
         return;
     }
     const containerHTML = subcategorias.map(subcategoria => {
@@ -312,7 +312,7 @@ function mostrarProductos(productos) {
     container.innerHTML = '';
 
     if (productos.length === 0) {
-        container.innerHTML = 'No se encontraron productos.';
+        container.innerHTML = 'Ez da produkturik aurkitu.';
         return;
     }
     const containerHTML = productos.map(producto => {
@@ -340,7 +340,7 @@ async function crearComanda(idMesa) {
     const data = await res.json();
 
     if (!res.ok || data.ok === false) {
-        AlertMessage('Error al crear la comanda: ' + (data.error || res.status));
+        AlertMessage('Errorea eskaera sortzean: ' + (data.error || res.status));
     }
 
     return data;
@@ -383,7 +383,7 @@ async function insertarDetalleComanda(idComanda, producto) {
 
 
     if (!resDetalle.ok || dataDetalle.ok === false) {
-       let message = 'Error al insertar detalle de comanda: ' + (dataDetalle.status || '');
+       let message = 'Errorea eskaeraren xehetasunak sartzean: ' + (dataDetalle.status || '');
         AlertMessage(message);
         return false;
     }

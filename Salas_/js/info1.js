@@ -9,7 +9,7 @@ const botonAceptar = document.querySelector('.boton-aceptar');
 let capacidadMax = null;
 
 if (!mesa) {
-    alert('No se ha seleccionado ninguna mesa. Vuelva al plano de salas.');
+    alert('Ez da mahairik aukeratu. Itzuli aretoen planora.');
     window.location.href = '/Salas_/sala1.html';
 } else {
     if (title) title.textContent = `MESA ${mesa}`;
@@ -32,13 +32,13 @@ if (!mesa) {
 botonAceptar.addEventListener('click', async function () {
     const cantidadIngresada = parseInt(entradaInput.value);
     if (isNaN(cantidadIngresada) || cantidadIngresada <= 0) {
-        alert('Por favor, ingresa un número válido de comensales.');
+        alert('Sartu baliozko bezero kopuru bat.');
         return;
     }
 
     // VALIDACION: no superar la capacidad de la mesa
     if (capacidadMax !== null && cantidadIngresada > capacidadMax) {
-        alert(`❌ La mesa ${mesa} admite como máximo ${capacidadMax} comensales.`);
+        alert(`❌ ${mesa}. mahaiak gehienez ${capacidadMax} bezero har ditzake.`);
         entradaInput.value = '';
         return;
     }

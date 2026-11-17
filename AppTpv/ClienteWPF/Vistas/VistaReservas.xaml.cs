@@ -56,7 +56,7 @@ public partial class VistaReservas : UserControl
         var f = LeerForm();
         if (f.error)
         {
-            TxtAviso.Text = "Completa mesa, turno, comensales (> 0) y nombre del cliente.";
+            TxtAviso.Text = "Bete mahaia, txanda, pertsona kopurua (> 0) eta bezeroaren izena.";
             return;
         }
 
@@ -69,7 +69,7 @@ public partial class VistaReservas : UserControl
             nombreCliente = f.cliente,
             observaciones = f.obs
         });
-        TxtAviso.Text = r.Ok ? "Reserva creada." : r.Error;
+        TxtAviso.Text = r.Ok ? "Erreserba sortu da." : r.Error;
         if (r.Ok) Refrescar();
     }
 
@@ -79,13 +79,13 @@ public partial class VistaReservas : UserControl
     {
         if (ReservaElegida is not { } elegida)
         {
-            TxtAviso.Text = "Elige una reserva de la lista para modificarla.";
+            TxtAviso.Text = "Aukeratu zerrendako erreserba bat aldatzeko.";
             return;
         }
         var f = LeerForm();
         if (f.error)
         {
-            TxtAviso.Text = "Completa mesa, turno, comensales (> 0) y nombre del cliente.";
+            TxtAviso.Text = "Bete mahaia, txanda, pertsona kopurua (> 0) eta bezeroaren izena.";
             return;
         }
         // El protocolo modifica campos sueltos; aqui aplicamos lo del formulario
@@ -98,7 +98,7 @@ public partial class VistaReservas : UserControl
             turno = f.turno,
             observaciones = f.obs
         });
-        TxtAviso.Text = r.Ok ? $"Reserva {elegida.IdReserva} modificada." : r.Error;
+        TxtAviso.Text = r.Ok ? $"{elegida.IdReserva} erreserba aldatu da." : r.Error;
         if (r.Ok) Refrescar();
     }
 
@@ -106,15 +106,15 @@ public partial class VistaReservas : UserControl
     {
         if (ReservaElegida is not { } elegida)
         {
-            TxtAviso.Text = "Elige una reserva de la lista para cancelarla.";
+            TxtAviso.Text = "Aukeratu zerrendako erreserba bat bertan behera uzteko.";
             return;
         }
-        var confirmo = MessageBox.Show($"¿Cancelas la reserva {elegida.IdReserva}?",
+        var confirmo = MessageBox.Show($"{elegida.IdReserva} erreserba bertan behera utzi nahi duzu?",
             "AppTpv", MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (confirmo != MessageBoxResult.Yes) return;
 
         var r = Conexion.Enviar("RESERVA_BORRAR", new { idReserva = elegida.IdReserva });
-        TxtAviso.Text = r.Ok ? "Reserva cancelada." : r.Error;
+        TxtAviso.Text = r.Ok ? "Erreserba bertan behera utzi da." : r.Error;
         if (r.Ok) Refrescar();
     }
 

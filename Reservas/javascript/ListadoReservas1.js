@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Función para cargar reservas para una fecha
   function cargarReservas(fecha) {
-    tablaBody.innerHTML = "<tr><td colspan='8'>Cargando...</td></tr>";
+    tablaBody.innerHTML = "<tr><td colspan='8'>Kargatzen...</td></tr>";
 
     fetch(`http://localhost:3000/GetReservasDia?fecha=${fecha}`)
       .then(response => {
@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tablaBody.innerHTML = "";
 
         if (datos.length === 0) {
-          tablaBody.innerHTML = "<tr><td colspan='8'>No hay reservas para este día</td></tr>";
+          tablaBody.innerHTML = "<tr><td colspan='8'>Ez dago erreserbarik egun honetarako</td></tr>";
           return;
         }
 
@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <td>${reserva.telefonoCliente}</td>
             <td>${reserva.numComensales}</td>
             <td>${reserva.observaciones}</td>
-            <td>  <button onclick="eliminarReserva(${reserva.idReserva})">-</button> </td>
+            <td>  <button aria-label="Erreserba ezabatu" onclick="eliminarReserva(${reserva.idReserva})">−</button> </td>
           `;
           tablaBody.appendChild(fila);
 
@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .catch(error => {
         console.error("Error:", error);
-        tablaBody.innerHTML = "<tr><td colspan='8'>Error al cargar reservas</td></tr>";
+        tablaBody.innerHTML = "<tr><td colspan='8'>Errorea erreserbak kargatzean</td></tr>";
       });
   }
    fechaInput.addEventListener("change", () => {
@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 function eliminarReserva(idreserva){
     console.log(idreserva);
-     if (!confirm(`¿Seguro que deseas eliminar la reserva?`)) return;
+     if (!confirm(`Ziur zaude erreserba ezabatu nahi duzula?`)) return;
 
         fetch(`http://localhost:3000/DeleteReserva?idreserva=${encodeURIComponent(idreserva)}`, {
       method: "DELETE", 

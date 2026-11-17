@@ -6,7 +6,7 @@
 <Window x:Class="ClienteWPF.Ventanas.VentanaLogin"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="AppTpv — Inicio de sesion" Height="310" Width="420"
+        Title="AppTpv — Saioa hasi" Height="310" Width="420"
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
     <Grid Margin="24">
         <Grid.ColumnDefinitions>
@@ -22,20 +22,20 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Sociedad gastronomica — TPV"
+        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Elkarte gastronomikoa — TPV"
                    FontSize="18" FontWeight="Bold" HorizontalAlignment="Center"/>
-        <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="Introduce tus credenciales de usuario"
+        <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="Sartu erabiltzailearen saio-hasierako datuak"
                    Foreground="Gray" HorizontalAlignment="Center" Margin="0,4,0,16"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="Usuario:" VerticalAlignment="Center"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Erabiltzailea:" VerticalAlignment="Center"/>
         <TextBox  Grid.Row="2" Grid.Column="1" x:Name="TxtLogin"
                   Height="26" Margin="0,0,0,8"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Text="Contrasena:" VerticalAlignment="Center"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Pasahitza:" VerticalAlignment="Center"/>
         <PasswordBox Grid.Row="3" Grid.Column="1" x:Name="TxtPass"
                      Height="26" Margin="0,0,0,14"/>
 
-        <Button Grid.Row="4" Grid.ColumnSpan="2" x:Name="BtnEntrar" Content="Entrar"
+        <Button Grid.Row="4" Grid.ColumnSpan="2" x:Name="BtnEntrar" Content="Sartu"
                 Height="30" Background="#2E7D32" Foreground="White"
                 Click="BtnEntrar_Click" IsDefault="True"/>
 

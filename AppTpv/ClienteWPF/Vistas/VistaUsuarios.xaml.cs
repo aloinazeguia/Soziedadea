@@ -33,16 +33,16 @@ public partial class VistaUsuarios : UserControl
         var login = TxtLogin.Text.Trim();
         var pass = TxtPass.Password;
         var nombre = TxtNombre.Text.Trim();
-        var rol = (CboRol.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "usuario";
+        var rol = (CboRol.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "usuario";
 
         if (login == "" || pass == "" || nombre == "")
         {
-            TxtAviso.Text = "Login, contrasena y nombre son obligatorios.";
+            TxtAviso.Text = "Erabiltzaile-izena, pasahitza eta izena nahitaezkoak dira.";
             return;
         }
 
         var r = Conexion.Enviar("USUARIO_CREAR", new { login, pass, nombre, rol });
-        TxtAviso.Text = r.Ok ? $"Usuario {login} creado." : r.Error;
+        TxtAviso.Text = r.Ok ? $"{login} erabiltzailea sortu da." : r.Error;
         if (r.Ok) Refrescar();
     }
 
@@ -52,13 +52,13 @@ public partial class VistaUsuarios : UserControl
     {
         if (Elegido is not { } elegido)
         {
-            TxtAviso.Text = "Elige un usuario de la lista para guardarle cambios.";
+            TxtAviso.Text = "Aukeratu zerrendako erabiltzaile bat aldaketak gordetzeko.";
             return;
         }
 
         var datos = new Dictionary<string, object> { ["id"] = elegido.Id };
         var nombre = TxtNombre.Text.Trim();
-        var rol = (CboRol.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "";
+        var rol = (CboRol.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "";
         var pass = TxtPass.Password;
 
         if (nombre != "" && nombre != elegido.Nombre) datos["nombre"] = nombre;
@@ -66,7 +66,7 @@ public partial class VistaUsuarios : UserControl
         if (pass != "") datos["pass"] = pass;
 
         var r = Conexion.Enviar("USUARIO_MODIFICAR", datos);
-        TxtAviso.Text = r.Ok ? $"Usuario {elegido.Login} actualizado." : r.Error;
+        TxtAviso.Text = r.Ok ? $"{elegido.Login} erabiltzailea eguneratu da." : r.Error;
         if (r.Ok) Refrescar();
     }
 
@@ -74,20 +74,20 @@ public partial class VistaUsuarios : UserControl
     {
         if (Elegido is not { } elegido)
         {
-            TxtAviso.Text = "Elige un usuario de la lista.";
+            TxtAviso.Text = "Aukeratu zerrendako erabiltzaile bat.";
             return;
         }
         if (elegido.Login == Sesion.Login)
         {
-            TxtAviso.Text = "No puedes deshabilitarte a ti mismo.";
+            TxtAviso.Text = "Ezin duzu zeure burua desgaitu.";
             return;
         }
-        var confirmo = MessageBox.Show($"¿Deshabilitas a {elegido.Login}? Ya no podra iniciar sesion.",
+        var confirmo = MessageBox.Show($"{elegido.Login} erabiltzailea desgaitu nahi duzu? Ezingo du saioa hasi aurrerantzean.",
             "AppTpv", MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (confirmo != MessageBoxResult.Yes) return;
 
         var r = Conexion.Enviar("USUARIO_BORRAR", new { id = elegido.Id });
-        TxtAviso.Text = r.Ok ? "Usuario deshabilitado." : r.Error;
+        TxtAviso.Text = r.Ok ? "Erabiltzailea desgaitu da." : r.Error;
         if (r.Ok) Refrescar();
     }
 

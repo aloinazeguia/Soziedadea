@@ -16,8 +16,8 @@ public partial class VentanaCantidad : Window
         InitializeComponent();
         TxtTitulo.Text = producto;
         TxtStock.Text = stock <= 0
-            ? "Sin unidades en el almacen"
-            : $"Unidades disponibles: {stock}";
+            ? "Ez dago unitaterik biltegian"
+            : $"Eskuragarri dauden unitateak: {stock}";
         _stockMaximo = stock;
     }
 
@@ -25,7 +25,7 @@ public partial class VentanaCantidad : Window
     {
         if (!int.TryParse(TxtCantidad.Text, out var n) || n <= 0)
         {
-            MessageBox.Show("Escribe un numero de unidades valido.", "AppTpv");
+            MessageBox.Show("Sartu unitate-kopuru baliozko bat.", "AppTpv");
             return;
         }
         // nota: es un aviso suave; el stock real lo valida el servidor al anadir

@@ -55,14 +55,14 @@ const botonAceptar = document.querySelector('.boton-aceptar');
 botonAceptar.addEventListener('click', function() {
   const cantidadIngresada = parseInt(entradaInput.value);
   if (isNaN(cantidadIngresada) || cantidadIngresada <= 0) {
-    alert('Por favor, ingresa un número válido de comensales.');
+    alert('Sartu baliozko bezero kopuru bat.');
     return;
   }
 /*
   // Validar que no supere la capacidad
   const capacidadMax = parseInt(numeroSpan.textContent);
   if (cantidadIngresada > capacidadMax) {
-    alert(`La cantidad ingresada supera la capacidad máxima de la mesa (${capacidadMax}).`);
+    alert(`Adierazitako kopuruak mahaiaren gehieneko edukiera gainditzen du (${capacidadMax}).`);
     return;
   }
      */

@@ -62,7 +62,7 @@ public partial class VistaConsumiciones : UserControl
         if (categorias.Count == 0)
         {
             _categoriaActual = "";
-            TxtCategoriaTitulo.Text = "PRODUCTOS";
+            TxtCategoriaTitulo.Text = "PRODUKTUAK";
             MostrarProductos(new List<ProductoVista>());
             return;
         }
@@ -84,7 +84,7 @@ public partial class VistaConsumiciones : UserControl
     {
         ListaProductos.ItemsSource = productos;
         TxtCartaInfo.Text = productos.Count == 0
-            ? "No hay productos en esta categoria."
+            ? "Ez dago produkturik kategoria honetan."
             : "";
     }
 
@@ -96,7 +96,7 @@ public partial class VistaConsumiciones : UserControl
 
         if (prod.Agotado)
         {
-            TxtCartaInfo.Text = $"{prod.Nombre}: no quedan unidades.";
+            TxtCartaInfo.Text = $"{prod.Nombre}: ez da unitaterik geratzen.";
             return;
         }
 
@@ -120,7 +120,7 @@ public partial class VistaConsumiciones : UserControl
         }
 
         RefrescarPedido();
-        TxtCartaInfo.Text = $"{prod.Nombre} anadido al pedido.";
+        TxtCartaInfo.Text = $"{prod.Nombre} eskaerara gehitu da.";
     }
 
     private void ListaPedido_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -143,7 +143,7 @@ public partial class VistaConsumiciones : UserControl
 
         if (!int.TryParse(TxtCantidadEditor.Text, out var cantidad) || cantidad < 1)
         {
-            MessageBox.Show("Escribe una cantidad valida (1 o mas).", "AppTpv",
+            MessageBox.Show("Sartu kopuru baliozko bat (1 edo gehiago).", "AppTpv",
                 MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
@@ -167,7 +167,7 @@ public partial class VistaConsumiciones : UserControl
         var pendientes = _lineas.Where(l => !l.Enviada).ToList();
         if (pendientes.Count == 0)
         {
-            MessageBox.Show("No hay productos nuevos para enviar.", "AppTpv",
+            MessageBox.Show("Ez dago bidaltzeko produktu berririk.", "AppTpv",
                 MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
@@ -179,7 +179,7 @@ public partial class VistaConsumiciones : UserControl
         }
 
         BtnEnviar.IsEnabled = false;
-        BtnEnviar.Content = "Enviando...";
+        BtnEnviar.Content = "Bidaltzen...";
 
         try
         {
@@ -194,7 +194,7 @@ public partial class VistaConsumiciones : UserControl
 
                 if (!r.Ok)
                 {
-                    MessageBox.Show(r.Error, "No se pudo enviar", MessageBoxButton.OK,
+                    MessageBox.Show(r.Error, "Ezin izan da bidali", MessageBoxButton.OK,
                         MessageBoxImage.Warning);
                     RefrescarPedido();
                     CargarCarta();
@@ -213,18 +213,18 @@ public partial class VistaConsumiciones : UserControl
 
             RefrescarPedido();
             CargarCarta();
-            TxtCartaInfo.Text = "Pedido enviado.";
+            TxtCartaInfo.Text = "Eskaera bidali da.";
         }
         finally
         {
-            BtnEnviar.Content = "Enviar";
+            BtnEnviar.Content = "Bidali";
             BtnEnviar.IsEnabled = true;
         }
     }
 
     /// <summary>
-    /// Abre una comanda nueva o adopta la que el usuario ya tuviera abierta
-    /// (el servidor responde "Ya tienes el pedido N abierto").
+    /// Eskaera berria irekitzen du edo erabiltzaileak irekita duena hartzen du
+    /// (zerbitzariak "Zure N zenbakiko eskaera irekita dago" erantzuten du).
     /// </summary>
     private bool AsegurarPedidoAbierto()
     {
@@ -236,7 +236,7 @@ public partial class VistaConsumiciones : UserControl
         }
         else
         {
-            var m = Regex.Match(r.Error, @"Ya tienes el pedido (\d+) abierto");
+            var m = Regex.Match(r.Error, @"Zure (\d+) zenbakiko eskaera irekita dago");
             if (!m.Success)
             {
                 MessageBox.Show(r.Error, "AppTpv", MessageBoxButton.OK,
@@ -246,7 +246,7 @@ public partial class VistaConsumiciones : UserControl
             _idPedido = int.Parse(m.Groups[1].Value);
         }
 
-        TxtEstadoPedido.Text = $"pedido n. {_idPedido}";
+        TxtEstadoPedido.Text = $"Eskaera zk. {_idPedido}";
         return true;
     }
 
@@ -290,13 +290,13 @@ public partial class VistaConsumiciones : UserControl
     {
         if (_lineas.Any(l => !l.Enviada))
         {
-            MessageBox.Show("Elimina o envia los productos pendientes.", "AppTpv",
+            MessageBox.Show("Ezabatu edo bidali zain dauden produktuak.", "AppTpv",
                 MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
         if (_lineas.Count == 0)
         {
-            MessageBox.Show("No hay productos en el pedido.", "AppTpv",
+            MessageBox.Show("Ez dago produkturik eskaeran.", "AppTpv",
                 MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
@@ -305,27 +305,27 @@ public partial class VistaConsumiciones : UserControl
             $" {l.Cantidad} x {l.Nombre,-24} {l.Importe:0.00} €"));
         var total = _lineas.Sum(l => l.Importe);
 
-        MessageBox.Show($"SUBTOTAL\n\n{desglose}\n\nTOTAL: {total:0.00} €\n(IVA 10% incluido)",
-            "Subtotal", MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show($"AZPITOTALA\n\n{desglose}\n\nGUZTIRA: {total:0.00} €\n(BEZ %10 barne)",
+            "Azpitotala", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void BtnCobrar_Click(object sender, RoutedEventArgs e)
     {
         if (_lineas.Any(l => !l.Enviada))
         {
-            MessageBox.Show("Elimina o envia los productos pendientes.", "AppTpv",
+            MessageBox.Show("Ezabatu edo bidali zain dauden produktuak.", "AppTpv",
                 MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
         if (_idPedido == 0)
         {
-            MessageBox.Show("No hay pedido abierto.", "AppTpv",
+            MessageBox.Show("Ez dago eskaera irekirik.", "AppTpv",
                 MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
         if (_lineas.Count == 0)
         {
-            MessageBox.Show("El pedido esta vacio.", "AppTpv",
+            MessageBox.Show("Eskaera hutsik dago.", "AppTpv",
                 MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
@@ -333,7 +333,7 @@ public partial class VistaConsumiciones : UserControl
         var r = Conexion.Enviar("PEDIDO_CONFIRMAR", new { idPedido = _idPedido });
         if (!r.Ok)
         {
-            MessageBox.Show(r.Error, "No se pudo cobrar", MessageBoxButton.OK,
+            MessageBox.Show(r.Error, "Ezin izan da kobratu", MessageBoxButton.OK,
                 MessageBoxImage.Warning);
             CargarCarta();
             return;
@@ -347,7 +347,7 @@ public partial class VistaConsumiciones : UserControl
         CargarCarta();
 
         MessageBox.Show(
-            $"Compra confirmada. Total: {total:0.00} €\nEl stock del almacen ya esta actualizado.",
+            $"Erosketa baieztatu da. Guztira: {total:0.00} €\nBiltegiko izakinak eguneratu dira.",
             "AppTpv", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
@@ -356,7 +356,7 @@ public partial class VistaConsumiciones : UserControl
         var id = _idPedido != 0 ? _idPedido : _idUltimoPedido;
         if (id == 0)
         {
-            MessageBox.Show("Aun no hay pedido para ver su ticket.", "AppTpv",
+            MessageBox.Show("Oraindik ez dago tiketa ikusteko eskaerarik.", "AppTpv",
                 MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
@@ -375,12 +375,12 @@ public partial class VistaConsumiciones : UserControl
         var desglose = string.Join("\n", lineas.Select(l =>
             $" {l.Cantidad} x {l.Nombre,-24} {l.Importe:0.00} €"));
 
-        var texto = $"Ticket del pedido {t.GetProperty("idPedido").GetInt32()}\n" +
-                    $"Cliente: {t.GetProperty("cliente").GetString()}\n" +
-                    $"Fecha:   {t.GetProperty("fecha").GetString()}\n" +
+        var texto = $"{t.GetProperty("idPedido").GetInt32()} eskaeraren tiketa\n" +
+                    $"Bezeroa: {t.GetProperty("cliente").GetString()}\n" +
+                    $"Data:    {t.GetProperty("fecha").GetString()}\n" +
                     $"\n{desglose}\n" +
-                    $"\nTOTAL: {t.GetProperty("total").GetDouble():0.00} € (IVA 10% incluido)";
-        MessageBox.Show(texto, "Ticket", MessageBoxButton.OK, MessageBoxImage.Information);
+                    $"\nGUZTIRA: {t.GetProperty("total").GetDouble():0.00} € (BEZ %10 barne)";
+        MessageBox.Show(texto, "Tiketa", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     // ---------- Refresco de la vista ----------
@@ -396,8 +396,8 @@ public partial class VistaConsumiciones : UserControl
         TxtTotal.Text = $"{total:0.00} €";
 
         TxtEstadoPedido.Text = _idPedido == 0
-            ? "sin pedido abierto"
-            : $"pedido n. {_idPedido}";
+            ? "Ez dago eskaera irekirik"
+            : $"Eskaera zk. {_idPedido}";
     }
 
     /// <summary>

@@ -17,22 +17,22 @@ document.querySelector("#FechaReserva").addEventListener("submit", function(even
     .then(response => response.json())
     .then(data => {
       if (data.mesas.length!=0) {
-        //alert(`✅ Hay disponibilidad para ${personas} personas ${fecha}.`);
+        //alert(`✅ Lekua dago ${fecha} egunean ${personas} lagunentzat.`);
         const numMesa=data.mesas[0].numMesa;
         localStorage.setItem("numMesa",numMesa);
         window.location.href = '/Reservas/html/iconfirmacion.html';
         
       } else if (data.length== 0) {
-        let message=`❌ No hay disponibilidad para esta ${fecha}`;
+        let message=`❌ Ez dago lekurik ${fecha} egunerako`;
         AlertMessage(message);
 
       } else {
-        alert("⚠️ " + (data.error || "Error al comprobar disponibilidad."));
+        alert("⚠️ " + (data.error || "Errorea erabilgarritasuna egiaztatzean."));
       }
     })
    .catch(error => {
       console.error("Error:", error);
-      alert("❌ Error al conectar con el servidor.");
+      alert("❌ Errorea zerbitzariarekin konektatzean.");
     
     });
   });

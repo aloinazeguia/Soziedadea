@@ -13,37 +13,37 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Column="0" Margin="0,0,10,0">
-            <TextBlock Text="Carta y almacen" FontSize="15"
+            <TextBlock Text="Menua eta biltegia" FontSize="15"
                        FontWeight="Bold" Margin="0,0,0,10"/>
 
-            <TextBlock Text="Nombre del producto:"/>
+            <TextBlock Text="Produktuaren izena:"/>
             <TextBox x:Name="TxtNombre" Margin="0,2,0,10"/>
 
-            <TextBlock Text="Precio (€):"/>
+            <TextBlock Text="Prezioa (€):"/>
             <TextBox x:Name="TxtPrecio" Text="0" Margin="0,2,0,10"/>
 
-            <TextBlock Text="Stock:"/>
+            <TextBlock Text="Izakinak:"/>
             <TextBox x:Name="TxtStock" Text="0" Margin="0,2,0,10"/>
 
-            <TextBlock Text="Ingredientes (osagaiak, separados por coma):"/>
+            <TextBlock Text="Osagaiak (komaz bereizita):"/>
             <TextBox x:Name="TxtIngredientes" Margin="0,2,0,10"/>
 
-            <TextBlock Text="Categoria:"/>
+            <TextBlock Text="Kategoria:"/>
             <TextBox x:Name="TxtCategoria" Text="general" Margin="0,2,0,10"/>
 
             <StackPanel Orientation="Horizontal">
-                <Button x:Name="BtnCrear" Content="Crear" Width="90" Margin="0,0,6,0"
+                <Button x:Name="BtnCrear" Content="Sortu" Width="90" Margin="0,0,6,0"
                         Background="#2E7D32" Foreground="White" Click="BtnCrear_Click"/>
-                <Button x:Name="BtnGuardar" Content="Guardar cambios" Width="120" Margin="0,0,6,0"
+                <Button x:Name="BtnGuardar" Content="Gorde aldaketak" Width="120" Margin="0,0,6,0"
                         Click="BtnGuardar_Click"/>
-                <Button x:Name="BtnBorrar" Content="Quitar" Width="80"
+                <Button x:Name="BtnBorrar" Content="Kendu" Width="80"
                         Click="BtnBorrar_Click"/>
             </StackPanel>
 
-            <TextBlock Text="Ajuste rapido de stock" FontWeight="Bold" Margin="0,14,0,4"/>
+            <TextBlock Text="Izakinak azkar doitu" FontWeight="Bold" Margin="0,14,0,4"/>
             <StackPanel Orientation="Horizontal">
                 <TextBox x:Name="TxtNuevoStock" Width="70"/>
-                <Button x:Name="BtnStock" Content="Poner stock" Width="100" Margin="8,0,0,0"
+                <Button x:Name="BtnStock" Content="Ezarri izakinak" Width="110" Margin="8,0,0,0"
                         Click="BtnStock_Click"/>
             </StackPanel>
 
@@ -52,21 +52,21 @@
 
         <DockPanel Grid.Column="1">
             <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
-                <TextBlock Text="Productos" FontSize="15" FontWeight="Bold"
+                <TextBlock Text="Produktuak" FontSize="15" FontWeight="Bold"
                            VerticalAlignment="Center"/>
-                <Button x:Name="BtnRefrescar" Content="Refrescar" Width="90" Margin="12,0,0,0"
+                <Button x:Name="BtnRefrescar" Content="Eguneratu" Width="90" Margin="12,0,0,0"
                         Click="BtnRefrescar_Click"/>
             </StackPanel>
             <DataGrid x:Name="GridProductos" AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionChanged="GridProductos_SelectionChanged">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="id" Binding="{Binding Id}" Width="40"/>
-                    <DataGridTextColumn Header="nombre" Binding="{Binding Nombre}" Width="140"/>
-                    <DataGridTextColumn Header="precio" Binding="{Binding Precio}" Width="70"/>
-                    <DataGridTextColumn Header="stock" Binding="{Binding Stock}" Width="60"/>
-                    <DataGridTextColumn Header="ingredientes" Binding="{Binding Ingredientes}" Width="*"/>
-                    <DataGridTextColumn Header="categoria" Binding="{Binding Categoria}" Width="90"/>
-                    <DataGridTextColumn Header="activo" Binding="{Binding Activo}" Width="50"/>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="40"/>
+                    <DataGridTextColumn Header="Izena" Binding="{Binding Nombre}" Width="140"/>
+                    <DataGridTextColumn Header="Prezioa" Binding="{Binding Precio}" Width="70"/>
+                    <DataGridTextColumn Header="Izakinak" Binding="{Binding Stock}" Width="70"/>
+                    <DataGridTextColumn Header="Osagaiak" Binding="{Binding Ingredientes}" Width="*"/>
+                    <DataGridTextColumn Header="Kategoria" Binding="{Binding Categoria}" Width="90"/>
+                    <DataGridTextColumn Header="Aktibo" Binding="{Binding AktiboErakutsi}" Width="60"/>
                 </DataGrid.Columns>
             </DataGrid>
         </DockPanel>

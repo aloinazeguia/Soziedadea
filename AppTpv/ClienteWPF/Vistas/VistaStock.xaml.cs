@@ -45,7 +45,7 @@ public partial class VistaStock : UserControl
         var f = LeerForm();
         if (f.error)
         {
-            TxtAviso.Text = "Nombre, precio (> 0) y stock (>= 0) son obligatorios.";
+            TxtAviso.Text = "Izena, prezioa (> 0) eta izakinak (>= 0) nahitaezkoak dira.";
             return;
         }
         var r = Conexion.Enviar("PRODUCTO_AGREGAR", new
@@ -53,7 +53,7 @@ public partial class VistaStock : UserControl
             nombre = f.nombre, precio = f.precio, stock = f.stock,
             ingredientes = f.ing, categoria = f.cat
         });
-        TxtAviso.Text = r.Ok ? "Producto creado." : r.Error;
+        TxtAviso.Text = r.Ok ? "Produktua sortu da." : r.Error;
         if (r.Ok) Refrescar();
     }
 
@@ -63,7 +63,7 @@ public partial class VistaStock : UserControl
     {
         if (Elegido is not { } elegido)
         {
-            TxtAviso.Text = "Elige un producto de la lista.";
+            TxtAviso.Text = "Aukeratu zerrendako produktu bat.";
             return;
         }
         var f = LeerForm();
@@ -78,7 +78,7 @@ public partial class VistaStock : UserControl
         if (f.stock >= 0) datos["stock"] = f.stock;
 
         var r = Conexion.Enviar("PRODUCTO_MODIFICAR", datos);
-        TxtAviso.Text = r.Ok ? $"Producto {elegido.Nombre} actualizado." : r.Error;
+        TxtAviso.Text = r.Ok ? $"{elegido.Nombre} produktua eguneratu da." : r.Error;
         if (r.Ok) Refrescar();
     }
 
@@ -86,17 +86,17 @@ public partial class VistaStock : UserControl
     {
         if (Elegido is not { } elegido)
         {
-            TxtAviso.Text = "Elige un producto de la lista.";
+            TxtAviso.Text = "Aukeratu zerrendako produktu bat.";
             return;
         }
         var confirmo = MessageBox.Show(
-            $"¿Quitas '{elegido.Nombre}' de la carta? (borrado logico; la historia " +
-            "de tickets no se ve afectada)", "AppTpv",
+            $"'{elegido.Nombre}' produktua menutik kendu nahi duzu? (ezabatze logikoa; " +
+            "tiketen historikoari ez dio eragingo)", "AppTpv",
             MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (confirmo != MessageBoxResult.Yes) return;
 
         var r = Conexion.Enviar("PRODUCTO_BORRAR", new { id = elegido.Id });
-        TxtAviso.Text = r.Ok ? "Producto quitado de la carta." : r.Error;
+        TxtAviso.Text = r.Ok ? "Produktua menutik kendu da." : r.Error;
         if (r.Ok) Refrescar();
     }
 
@@ -104,16 +104,16 @@ public partial class VistaStock : UserControl
     {
         if (Elegido is not { } elegido)
         {
-            TxtAviso.Text = "Elige un producto de la lista.";
+            TxtAviso.Text = "Aukeratu zerrendako produktu bat.";
             return;
         }
         if (!int.TryParse(TxtNuevoStock.Text, out var stock) || stock < 0)
         {
-            TxtAviso.Text = "Escribe un stock valido (>= 0).";
+            TxtAviso.Text = "Sartu izakin-kopuru baliozko bat (>= 0).";
             return;
         }
         var r = Conexion.Enviar("STOCK_MODIFICAR", new { id = elegido.Id, stock });
-        TxtAviso.Text = r.Ok ? $"Stock de '{elegido.Nombre}' puesto a {stock}." : r.Error;
+        TxtAviso.Text = r.Ok ? $"'{elegido.Nombre}' produktuaren izakinak {stock} dira." : r.Error;
         if (r.Ok) Refrescar();
     }
 

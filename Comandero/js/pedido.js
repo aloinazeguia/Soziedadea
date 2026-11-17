@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             const productosPendientes = pedidoGuardado ? JSON.parse(pedidoGuardado) : [];
 
             if (hayProductosPendientesValidos(productosPendientes)) {
-                AlertMessage("Elimina o envía los productos pendientes.");
+                AlertMessage("Ezabatu edo bidali dauden produktuak.");
             } else {
                 window.location.href = "cobrar.html";
             }
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             const productosPendientes = pedidoGuardado ? JSON.parse(pedidoGuardado) : [];
 
             if (hayProductosPendientesValidos(productosPendientes)) {
-                AlertMessage("Elimina o envía los productos pendientes.");
+                AlertMessage("Ezabatu edo bidali dauden produktuak.");
             } else {
                 window.location.href = "subtotal.html";
             }
@@ -121,8 +121,8 @@ export function agregarProductoAlPedido(nombre, precio, cantidad = 1, id, numOrd
         editor.classList.add('editor');
         editor.innerHTML = `
             <input type="number" min="1" value="${li.dataset.cantidad}" />
-            <button class="guardar">Guardar</button>
-            <button class="eliminar">Eliminar</button>
+            <button class="guardar">Gorde</button>
+            <button class="eliminar">Ezabatu</button>
         `;
 
         editor.addEventListener('click', (e) => {

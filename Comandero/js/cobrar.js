@@ -8,16 +8,16 @@ document.addEventListener('DOMContentLoaded', () => {
     //document.getElementById("boton-tarjeta").addEventListener('click',  PagoTarjeta);
     //document.getElementById("boton-efectivo").addEventListener('click', () => PagoEfectivo(pedidoActual));
     document.getElementById("boton-tarjeta").addEventListener('click', async () => {
-    localStorage.setItem("formaPago", "Pago con Tarjeta");
+    localStorage.setItem("formaPago", "Txartel bidezko ordainketa");
     await marcarCobrada();  // mesa pasa a AZUL mientras se hace la factura
     PagoTarjeta();  // Llamada a la función
-    AlertMessage("La operación se ha realizado con éxito", "factura.html");
+    AlertMessage("Eragiketa behar bezala egin da.", "factura.html");
 });
 
 document.getElementById("boton-efectivo").addEventListener('click', () => {
-    localStorage.setItem("formaPago", "Pago en Efectivo");
+    localStorage.setItem("formaPago", "Eskudiruzko ordainketa");
     PagoEfectivo(pedidoActual);  // Llamada a la función con pedidoActual
-    AlertMessage("La operación se ha realizado con éxito", "factura.html");
+    AlertMessage("Eragiketa behar bezala egin da.", "factura.html");
 });
     document.getElementById("boton-cancelar").addEventListener('click', async () => { cancelarPago() });
 
@@ -30,7 +30,7 @@ async function mostrarPedidoEnCobrar() {
 
     const mesaId = localStorage.getItem('mesaSeleccionada');
     if (!mesaId) {
-        lista.innerHTML = '<li>No hay mesa seleccionada.</li>';
+        lista.innerHTML = '<li>Ez da mahairik aukeratu.</li>';
         return;
     }
 
@@ -67,7 +67,7 @@ async function mostrarPedidoEnCobrar() {
     }
 
     if (!pedidoGuardado || pedidoGuardado.length === 0) {
-        lista.innerHTML = '<li>No hay productos en el pedido.</li>';
+        lista.innerHTML = '<li>Ez dago produkturik eskaeran.</li>';
         return;
     }
 
@@ -96,20 +96,20 @@ function mostrarTotalEnCobrar(pedido) {
 }
 
 async function cancelarPago() {
-    let message = "¿Estás seguro de cancelar la operación?";
+    let message = "Ziur zaude eragiketa utzi nahi duzula?";
     if (await AlertConfirm(message)) {
         const mesaId = localStorage.getItem('mesaSeleccionada');
         localStorage.removeItem(`pedido_mesa_${mesaId}`);
 
         window.location.href = './menu.html';
     } else {
-        AlertMessage("Operación cancelada");
+        AlertMessage("Eragiketa bertan behera utzi da.");
     }
 }
 
 async function PagoTarjeta() {
     
-    let message = "La operación se ha realizado con éxito";
+    let message = "Eragiketa behar bezala egin da.";
     let redirection = 'factura.html';
     AlertMessage(message, redirection);
 }
@@ -117,7 +117,7 @@ async function PagoTarjeta() {
 async function PagoEfectivo(pedido) {
 
     if (!pedido || !Array.isArray(pedido) || pedido.length === 0) {
-        AlertMessage("No hay productos cargados para cobrar.");
+        AlertMessage("Ez dago kobratzeko produkturik.");
         return;
     }
 
@@ -127,9 +127,9 @@ async function PagoEfectivo(pedido) {
         return sum + precio * cantidad;
     }, 0);
 
-    let recibido = parseFloat(prompt('Ingrese la cantidad recibida:'));
+    let recibido = parseFloat(prompt('Sartu jasotako zenbatekoa:'));
     if (isNaN(recibido)) {
-        AlertMessage("Por favor, ingrese una cantidad válida.");
+        AlertMessage("Sartu baliozko zenbateko bat.");
         return;
     }
 
@@ -142,7 +142,7 @@ async function PagoEfectivo(pedido) {
     if (cambio === 0) {
         localStorage.setItem("formaPago","Pago en efectivo");
         await marcarCobrada();  // mesa pasa a AZUL mientras se hace la factura
-        message = 'Pago realizado con éxito. Importe Exacto';
+        message = 'Ordainketa behar bezala egin da. Zenbateko zehatza.';
         redirection = 'factura.html';
 
 
@@ -150,13 +150,13 @@ async function PagoEfectivo(pedido) {
     } else if (cambio > 0) {
         localStorage.setItem("formaPago","Pago en efectivo");
         await marcarCobrada();  // mesa pasa a AZUL mientras se hace la factura
-        message = `Pago realizado con éxito. Su cambio es: €${cambio.toFixed(2)}`;
+        message = `Ordainketa behar bezala egin da. Itzulketa: ${cambio.toFixed(2)} €`;
         redirection = 'factura.html';
 
 
         AlertMessage(message, redirection);
     } else {
-        message = 'El importe recibido es insuficiente.';
+        message = 'Jasotako zenbatekoa ez da nahikoa.';
         AlertMessage(message);
     }
 }

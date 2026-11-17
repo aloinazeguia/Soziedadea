@@ -31,7 +31,7 @@ async function cambiarColorMesa(mesaElemento, estado) {
    if (estado==0) {
      mesaElemento.style.backgroundColor = "green"; // Libre
      mesaElemento.addEventListener('click', async function() {
-      let message='¿estas seguro que quieres esa mesa?';
+      let message='Ziur zaude mahai hori nahi duzula?';
       let redirection= "/Reservas/html/iconfirmacion.html";
       
       if(await AlertConfirm(message)){

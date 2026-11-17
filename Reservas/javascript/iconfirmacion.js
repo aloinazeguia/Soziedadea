@@ -6,9 +6,9 @@ document.addEventListener("DOMContentLoaded",()=>{
     const datos = resumen[0].querySelectorAll("p");
  
     if (datos.length >= 1) {
-      datos[0].innerHTML = `<p><strong>DÍA:</strong>${fecha}</p>`;
-      datos[1].innerHTML = `<p><strong>Personas:</strong>${numComensales}</p> `;
-      datos[2].innerHTML =`<p><strong>Mesa:</strong>${numMesa}</p>`
+      datos[0].innerHTML = `<p><strong>EGUNA:</strong>${fecha}</p>`;
+      datos[1].innerHTML = `<p><strong>Pertsonak:</strong>${numComensales}</p> `;
+      datos[2].innerHTML =`<p><strong>Mahaia:</strong>${numMesa}</p>`
     }
   
     // Insertar datos en los párrafos del resumen
@@ -60,12 +60,12 @@ function DatosUsuario(){
       alert("❌ " + data.error);
       return;
     }
-    alert("Reserva Exitosa");
+    alert("Erreserba behar bezala egin da.");
     localStorage.clear();
     window.location.href = "/Salas_/sala1.html";
   })
   .catch(error => {
     console.error("Error al enviar reserva:", error);
-    alert("Error al Reservar");
+    alert("Errorea erreserba egitean.");
   });
 }

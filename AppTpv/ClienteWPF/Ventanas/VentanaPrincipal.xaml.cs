@@ -12,13 +12,14 @@ public partial class VentanaPrincipal : Window
     public VentanaPrincipal()
     {
         InitializeComponent();
-        TxtQuien.Text = $"{Sesion.Nombre} ({Sesion.Login}) — rol: {Sesion.Rol}";
+        var rol = Sesion.EsAdmin ? "Administratzailea" : "Erabiltzailea";
+        TxtQuien.Text = $"{Sesion.Nombre} ({Sesion.Login}) — rola: {rol}";
 
         // el usuario comun no ves las fichas de administracion (requisito 2)
         if (!Sesion.EsAdmin)
         {
-            var fichaUsuarios = Fichas.Items.OfType<TabItem>().First(t => t.Header.ToString() == "Usuarios");
-            var fichaStock    = Fichas.Items.OfType<TabItem>().First(t => t.Header.ToString() == "Stock");
+            var fichaUsuarios = Fichas.Items.OfType<TabItem>().First(t => t.Tag?.ToString() == "Usuarios");
+            var fichaStock    = Fichas.Items.OfType<TabItem>().First(t => t.Tag?.ToString() == "Stock");
             fichaUsuarios.Visibility = Visibility.Collapsed;
             fichaStock.Visibility = Visibility.Collapsed;
         }

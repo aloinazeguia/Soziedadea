@@ -17,6 +17,7 @@ public class ProductoVista
     [JsonPropertyName("activo")] public int Activo { get; set; }
 
     public bool Agotado => Stock <= 0;
+    public string AktiboErakutsi => Activo == 1 ? "Bai" : "Ez";
 }
 
 public class MesaVista
@@ -25,7 +26,7 @@ public class MesaVista
     [JsonPropertyName("numMesa")] public int NumMesa { get; set; }
     [JsonPropertyName("capacidad")] public int Capacidad { get; set; }
 
-    public string Descripcion => $"Mesa {NumMesa} (capacidad {Capacidad})";
+    public string Descripcion => $"Mahaia {NumMesa} (edukiera: {Capacidad})";
 }
 
 public class ReservaVista
@@ -38,6 +39,8 @@ public class ReservaVista
     [JsonPropertyName("nombreCliente")] public string NombreCliente { get; set; } = "";
     [JsonPropertyName("observaciones")] public string Observaciones { get; set; } = "";
     [JsonPropertyName("estado")] public string Estado { get; set; } = "";
+
+    public string FechaErakutsi => Fecha == "sin fecha" ? "Datarik gabe" : Fecha;
 }
 
 public class UsuarioVista
@@ -47,6 +50,9 @@ public class UsuarioVista
     [JsonPropertyName("nombre")] public string Nombre { get; set; } = "";
     [JsonPropertyName("rol")] public string Rol { get; set; } = "";
     [JsonPropertyName("activo")] public int Activo { get; set; }
+
+    public string RolErakutsi => Rol == "admin" ? "Administratzailea" : "Erabiltzailea";
+    public string AktiboErakutsi => Activo == 1 ? "Bai" : "Ez";
 }
 
 public class LineaVista

@@ -16,23 +16,23 @@
         <!-- barra superior con la identidad del usuario -->
         <Border DockPanel.Dock="Top" Background="#EEEEEE" Padding="10,6">
             <DockPanel>
-                <Button DockPanel.Dock="Right" x:Name="BtnSalir" Content="Cerrar sesion"
+                <Button DockPanel.Dock="Right" x:Name="BtnSalir" Content="Amaitu saioa"
                         Click="BtnSalir_Click" Width="110"/>
                 <TextBlock x:Name="TxtQuien" FontWeight="Bold" VerticalAlignment="Center"/>
             </DockPanel>
         </Border>
 
         <TabControl x:Name="Fichas">
-            <TabItem Header="Consumiciones">
+            <TabItem Header="Kontsumizioak" Tag="Consumiciones">
                 <vistas:VistaConsumiciones/>
             </TabItem>
-            <TabItem Header="Reservas">
+            <TabItem Header="Erreserbak" Tag="Reservas">
                 <vistas:VistaReservas/>
             </TabItem>
-            <TabItem Header="Usuarios">
+            <TabItem Header="Erabiltzaileak" Tag="Usuarios">
                 <vistas:VistaUsuarios/>
             </TabItem>
-            <TabItem Header="Stock">
+            <TabItem Header="Izakinak" Tag="Stock">
                 <vistas:VistaStock/>
             </TabItem>
         </TabControl>

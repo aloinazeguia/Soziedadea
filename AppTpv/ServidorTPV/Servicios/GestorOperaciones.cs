@@ -54,7 +54,7 @@ public static class GestorOperaciones
                 "PEDIDO_CANCELAR"     => RequiereSesion(sesion, () => Ped_Cancelar(sesion!, datos)),
                 "TICKET_OBTENER"      => RequiereSesion(sesion, () => Ped_Ticket(datos)),
 
-                _ => Resultado.Mal($"Accion desconocida: {accion}")
+                _ => Resultado.Mal("Eskatutako ekintza ez da ezagutzen")
             };
         }
         catch (ExNoAutorizado ex)
@@ -64,7 +64,7 @@ public static class GestorOperaciones
         catch (Exception ex)
         {
             Console.WriteLine($"[ERROR] {accion}: {ex.Message}");
-            return Resultado.Mal($"Error interno en {accion}: {ex.Message}");
+            return Resultado.Mal("Errorea gertatu da eskaera prozesatzean");
         }
     }
 
@@ -77,14 +77,14 @@ public static class GestorOperaciones
 
     private static Resultado RequiereAdmin(SesionUsuario? s, Func<Resultado> accion)
     {
-        if (s == null) throw new ExNoAutorizado("No hay sesion abierta (falta el token)");
-        if (s.Rol != "admin") throw new ExNoAutorizado("Accion reservada al administrador");
+        if (s == null) throw new ExNoAutorizado("Ez dago saio aktiborik (tokena falta da)");
+        if (s.Rol != "admin") throw new ExNoAutorizado("Ekintza hau administratzaileentzat bakarrik dago baimenduta");
         return accion();
     }
 
     private static Resultado RequiereSesion(SesionUsuario? s, Func<Resultado> accion)
     {
-        if (s == null) throw new ExNoAutorizado("No hay sesion abierta (falta el token)");
+        if (s == null) throw new ExNoAutorizado("Ez dago saio aktiborik (tokena falta da)");
         return accion();
     }
 
@@ -117,7 +117,7 @@ public static class GestorOperaciones
         var login = Str(d, "login");
         var pass  = Str(d, "pass");
         if (login == "" || pass == "")
-            return Resultado.Mal("Faltan login o pass");
+            return Resultado.Mal("Erabiltzaile-izena edo pasahitza falta da");
 
         using var con = BaseDatos.Conectar();
         con.Open();
@@ -127,11 +127,11 @@ public static class GestorOperaciones
         cmd.Parameters.AddWithValue("@l", login);
         using var r = cmd.ExecuteReader();
         if (!r.Read())
-            return Resultado.Mal("Credenciales invalidas");
+            return Resultado.Mal("Erabiltzaile-izena edo pasahitza ez dira zuzenak");
 
         var hash = Seguridad.HashPassword(pass);
         if (r.GetString(1) != hash)
-            return Resultado.Mal("Credenciales invalidas");
+            return Resultado.Mal("Erabiltzaile-izena edo pasahitza ez dira zuzenak");
 
         var sesion = new SesionUsuario(r.GetInt32(0), login, r.GetString(2), r.GetString(3));
         var token = Sesiones.Crear(sesion);
@@ -166,7 +166,7 @@ public static class GestorOperaciones
         var precio = Num(d, "precio");
         var stock  = Int(d, "stock");
         if (nombre == "" || precio <= 0)
-            return Resultado.Mal("Nombre y precio son obligatorios (precio > 0)");
+            return Resultado.Mal("Izena eta prezioa nahitaezkoak dira (prezioa > 0)");
 
         return Escritura(con =>
         {
@@ -181,7 +181,7 @@ public static class GestorOperaciones
             cmd.Parameters.AddWithValue("@c", Str(d, "categoria") is "" ? "general" : Str(d, "categoria"));
             var filas = cmd.ExecuteNonQuery();
             return filas == 0
-                ? Resultado.Mal("Ya existe un producto con ese nombre")
+                ? Resultado.Mal("Izen hori duen produktua badago lehendik")
                 : Resultado.Bien(new { mensaje = "Producto creado" });
         });
     }
@@ -189,7 +189,7 @@ public static class GestorOperaciones
     private static Resultado Pro_Modificar(JsonElement d)
     {
         var id = Int(d, "id");
-        if (id <= 0) return Resultado.Mal("Falta el id del producto");
+        if (id <= 0) return Resultado.Mal("Produktuaren IDa falta da");
 
         return Escritura(con =>
         {
@@ -213,7 +213,7 @@ public static class GestorOperaciones
             cmd.Parameters.AddWithValue("@a", Tiene(d, "activo") ? (object)Int(d, "activo") : DBNull.Value);
             cmd.Parameters.AddWithValue("@id", id);
             return cmd.ExecuteNonQuery() == 0
-                ? Resultado.Mal("Producto no encontrado")
+                ? Resultado.Mal("Ez da produktua aurkitu")
                 : Resultado.Bien(new { mensaje = "Producto actualizado" });
         });
     }
@@ -221,7 +221,7 @@ public static class GestorOperaciones
     private static Resultado Pro_Borrar(JsonElement d)
     {
         var id = Int(d, "id");
-        if (id <= 0) return Resultado.Mal("Falta el id del producto");
+        if (id <= 0) return Resultado.Mal("Produktuaren IDa falta da");
 
         // Borrado LOGICO: si el producto ya aparece en lineas de pedidos,
         // lo desactivamos para no romper la historia del ticket.
@@ -232,7 +232,7 @@ public static class GestorOperaciones
                 UPDATE Producto SET activo = 0 WHERE id = @id";
             cmd.Parameters.AddWithValue("@id", id);
             return cmd.ExecuteNonQuery() == 0
-                ? Resultado.Mal("Producto no encontrado")
+                ? Resultado.Mal("Ez da produktua aurkitu")
                 : Resultado.Bien(new { mensaje = "Producto eliminado (desactivado)" });
         });
     }
@@ -242,7 +242,7 @@ public static class GestorOperaciones
         var id = Int(d, "id");
         var stock = Int(d, "stock");
         if (id <= 0 || stock < 0)
-            return Resultado.Mal("id invalido o stock negativo");
+            return Resultado.Mal("IDa ez da baliozkoa edo izakin-kopurua negatiboa da");
 
         return Escritura(con =>
         {
@@ -251,7 +251,7 @@ public static class GestorOperaciones
             cmd.Parameters.AddWithValue("@s", stock);
             cmd.Parameters.AddWithValue("@id", id);
             return cmd.ExecuteNonQuery() == 0
-                ? Resultado.Mal("Producto no encontrado")
+                ? Resultado.Mal("Ez da produktua aurkitu")
                 : Resultado.Bien(new { mensaje = $"Stock actualizado a {stock}" });
         });
     }
@@ -267,9 +267,9 @@ public static class GestorOperaciones
         var nombre = Str(d, "nombre");
         var rol   = Str(d, "rol");
         if (login == "" || pass == "" || nombre == "")
-            return Resultado.Mal("Login, pass y nombre son obligatorios");
+            return Resultado.Mal("Erabiltzaile-izena, pasahitza eta izena nahitaezkoak dira");
         if (rol != "admin" && rol != "usuario")
-            return Resultado.Mal("El rol debe ser 'admin' o 'usuario'");
+            return Resultado.Mal("Aukeratutako rola ez da baliozkoa");
 
         return Escritura(con =>
         {
@@ -283,7 +283,7 @@ public static class GestorOperaciones
             cmd.Parameters.AddWithValue("@r", rol);
             var filas = cmd.ExecuteNonQuery();
             return filas == 0
-                ? Resultado.Mal("Ya existe ese login")
+                ? Resultado.Mal("Erabiltzaile-izen hori badago lehendik")
                 : Resultado.Bien(new { mensaje = $"Usuario {login} creado" });
         });
     }
@@ -291,7 +291,7 @@ public static class GestorOperaciones
     private static Resultado Usu_Modificar(JsonElement d)
     {
         var id = Int(d, "id");
-        if (id <= 0) return Resultado.Mal("Falta el id de usuario");
+        if (id <= 0) return Resultado.Mal("Erabiltzailearen IDa falta da");
 
         return Escritura(con =>
         {
@@ -313,7 +313,7 @@ public static class GestorOperaciones
                 ? (object)Int(d, "activo") : DBNull.Value);
             cmd.Parameters.AddWithValue("@id", id);
             return cmd.ExecuteNonQuery() == 0
-                ? Resultado.Mal("Usuario no encontrado")
+                ? Resultado.Mal("Ez da erabiltzailea aurkitu")
                 : Resultado.Bien(new { mensaje = "Usuario actualizado" });
         });
     }
@@ -321,7 +321,7 @@ public static class GestorOperaciones
     private static Resultado Usu_Borrar(JsonElement d)
     {
         var id = Int(d, "id");
-        if (id <= 0) return Resultado.Mal("Falta el id de usuario");
+        if (id <= 0) return Resultado.Mal("Erabiltzailearen IDa falta da");
 
         return Escritura(con =>
         {
@@ -329,7 +329,7 @@ public static class GestorOperaciones
             cmd.CommandText = "UPDATE Usuario SET activo = 0 WHERE id = @id";
             cmd.Parameters.AddWithValue("@id", id);
             return cmd.ExecuteNonQuery() == 0
-                ? Resultado.Mal("Usuario no encontrado")
+                ? Resultado.Mal("Ez da erabiltzailea aurkitu")
                 : Resultado.Bien(new { mensaje = "Usuario deshabilitado" });
         });
     }
@@ -375,17 +375,17 @@ public static class GestorOperaciones
         var obs = StrOpt(d, "observaciones");
 
         if (idMesa <= 0 || comensales <= 0)
-            return Resultado.Mal("Falta la mesa o los comensales no son validos");
+            return Resultado.Mal("Mahaia falta da edo pertsona kopurua ez da baliozkoa");
         if (turno != "bazkaria" && turno != "afaria")
-            return Resultado.Mal("El turno debe ser 'bazkaria' o 'afaria'");
+            return Resultado.Mal("Txandak 'bazkaria' edo 'afaria' izan behar du");
         if (nombre == "")
-            return Resultado.Mal("Falta el nombre del cliente");
+            return Resultado.Mal("Bezeroaren izena falta da");
         DateTime? f = null;
         if (!string.IsNullOrEmpty(fecha))
         {
             if (!DateTime.TryParseExact(fecha, "yyyy-MM-dd", null,
                     System.Globalization.DateTimeStyles.None, out var parsed))
-                return Resultado.Mal("La fecha debe ser YYYY-MM-DD (o venir vacia)");
+                return Resultado.Mal("Datak YYYY-MM-DD formatua izan behar du (edo hutsik egon)");
             f = parsed;
         }
 
@@ -403,12 +403,12 @@ public static class GestorOperaciones
                 if (cap == null)
                 {
                     trans.Rollback();
-                    return Resultado.Mal("La mesa no existe");
+                    return Resultado.Mal("Mahaia ez da existitzen");
                 }
                 if (comensales > (long)cap)
                 {
                     trans.Rollback();
-                    return Resultado.Mal($"La mesa admite como maximo {cap} comensales");
+                    return Resultado.Mal($"Mahaiak gehienez {cap} lagun onartzen ditu");
                 }
             }
 
@@ -427,7 +427,7 @@ public static class GestorOperaciones
                 if (c2.ExecuteScalar() != null)
                 {
                     trans.Rollback();
-                    return Resultado.Mal($"Esa mesa ya esta reservada {turno} en esa fecha");
+                    return Resultado.Mal($"Mahaia {turno} txandarako erreserbatuta dago data horretan");
                 }
             }
 
@@ -455,7 +455,7 @@ public static class GestorOperaciones
     private static Resultado Res_Modificar(SesionUsuario ses, JsonElement d)
     {
         var id = Int(d, "idReserva");
-        if (id <= 0) return Resultado.Mal("Falta el id de la reserva");
+        if (id <= 0) return Resultado.Mal("Erreserbaren IDa falta da");
 
         return Escritura(con =>
         {
@@ -463,9 +463,9 @@ public static class GestorOperaciones
             c.CommandText = @"SELECT idUsuario FROM Reserva WHERE id = @i AND estado = 'activa'";
             c.Parameters.AddWithValue("@i", id);
             var dueno = c.ExecuteScalar();
-            if (dueno == null) return Resultado.Mal("Reserva no encontrada o ya cancelada");
+            if (dueno == null) return Resultado.Mal("Ez da erreserba aurkitu, edo dagoeneko bertan behera utzi da");
             if (ses.Rol != "admin" && (long)dueno != ses.IdUsuario)
-                return Resultado.Mal("Solo puedes modificar tus propias reservas");
+                return Resultado.Mal("Zure erreserbak bakarrik alda ditzakezu");
 
             using var u = con.CreateCommand();
             u.CommandText = @"
@@ -495,7 +495,7 @@ public static class GestorOperaciones
     private static Resultado Res_Borrar(SesionUsuario ses, JsonElement d)
     {
         var id = Int(d, "idReserva");
-        if (id <= 0) return Resultado.Mal("Falta el id de la reserva");
+        if (id <= 0) return Resultado.Mal("Erreserbaren IDa falta da");
 
         return Escritura(con =>
         {
@@ -503,9 +503,9 @@ public static class GestorOperaciones
             c.CommandText = @"SELECT idUsuario FROM Reserva WHERE id = @i AND estado = 'activa'";
             c.Parameters.AddWithValue("@i", id);
             var dueno = c.ExecuteScalar();
-            if (dueno == null) return Resultado.Mal("Reserva no encontrada o ya cancelada");
+            if (dueno == null) return Resultado.Mal("Ez da erreserba aurkitu, edo dagoeneko bertan behera utzi da");
             if (ses.Rol != "admin" && (long)dueno != ses.IdUsuario)
-                return Resultado.Mal("Solo puedes borrar tus propias reservas");
+                return Resultado.Mal("Zure erreserbak bakarrik ezaba ditzakezu");
 
             using var u = con.CreateCommand();
             u.CommandText = "UPDATE Reserva SET estado = 'cancelada' WHERE id = @i";
@@ -554,7 +554,7 @@ public static class GestorOperaciones
     private static Resultado Ped_Abrir(SesionUsuario ses)
     {
         if (HayPedidoAbierto(ses.IdUsuario, out var yaAbierto))
-            return Resultado.Mal($"Ya tienes el pedido {yaAbierto} abierto");
+            return Resultado.Mal($"Zure {yaAbierto} zenbakiko eskaera irekita dago");
 
         return Escritura(con =>
         {
@@ -576,7 +576,7 @@ public static class GestorOperaciones
         var idProducto = Int(d, "idProducto");
         var cantidad = Int(d, "cantidad");
         if (idPedido <= 0 || idProducto <= 0 || cantidad <= 0)
-            return Resultado.Mal("idPedido, idProducto y cantidad (> 0) son obligatorios");
+            return Resultado.Mal("Eskaeraren IDa, produktuaren IDa eta kopurua (> 0) nahitaezkoak dira");
 
         return Escritura(con =>
         {
@@ -593,12 +593,12 @@ public static class GestorOperaciones
                 if (dueno == null)
                 {
                     trans.Rollback();
-                    return Resultado.Mal("Pedido no encontrado o ya cobrado");
+                    return Resultado.Mal("Ez da eskaera aurkitu, edo dagoeneko kobratu da");
                 }
                 if (ses.Rol != "admin" && (long)dueno != ses.IdUsuario)
                 {
                     trans.Rollback();
-                    return Resultado.Mal("Ese pedido no es tuyo");
+                    return Resultado.Mal("Eskaera hori ez da zurea");
                 }
             }
 
@@ -620,12 +620,12 @@ public static class GestorOperaciones
                 if (!r2.Read())
                 {
                     trans.Rollback();
-                    return Resultado.Mal("Producto no encontrado");
+                    return Resultado.Mal("Ez da produktua aurkitu");
                 }
                 if (r2.GetInt32(2) != 1)
                 {
                     trans.Rollback();
-                    return Resultado.Mal("Producto no disponible");
+                    return Resultado.Mal("Produktua ez dago eskuragarri");
                 }
                 precio = r2.GetDouble(0);
                 var stock = r2.GetInt32(1);
@@ -633,7 +633,7 @@ public static class GestorOperaciones
                 if (yaEnPedido + cantidad > stock)
                 {
                     trans.Rollback();
-                    return Resultado.Mal($"Stock insuficiente: quedan {stock} unidades de ese producto");
+                    return Resultado.Mal($"Ez dago nahikoa izakin: {stock} unitate geratzen dira produktu horretatik");
                 }
             }
 
@@ -671,7 +671,7 @@ public static class GestorOperaciones
     private static Resultado Ped_Confirmar(SesionUsuario ses, JsonElement d)
     {
         var idPedido = Int(d, "idPedido");
-        if (idPedido <= 0) return Resultado.Mal("Falta el id del pedido");
+        if (idPedido <= 0) return Resultado.Mal("Eskaeraren IDa falta da");
 
         return Escritura(con =>
         {
@@ -686,17 +686,17 @@ public static class GestorOperaciones
                 if (!r.Read())
                 {
                     trans.Rollback();
-                    return Resultado.Mal("Pedido no encontrado");
+                    return Resultado.Mal("Ez da eskaera aurkitu");
                 }
                 if (ses.Rol != "admin" && (long)r.GetInt64(0) != ses.IdUsuario)
                 {
                     trans.Rollback();
-                    return Resultado.Mal("Ese pedido no es tuyo");
+                    return Resultado.Mal("Eskaera hori ez da zurea");
                 }
                 if (r.GetString(2) != "abierta")
                 {
                     trans.Rollback();
-                    return Resultado.Mal("El pedido ya no esta abierto");
+                    return Resultado.Mal("Eskaera ez dago irekita");
                 }
             }
 
@@ -716,7 +716,7 @@ public static class GestorOperaciones
             if (lineas.Count == 0)
             {
                 trans.Rollback();
-                return Resultado.Mal("El pedido esta vacio");
+                return Resultado.Mal("Eskaera hutsik dago");
             }
 
             // verificar stock disponible de una vez
@@ -730,7 +730,7 @@ public static class GestorOperaciones
                 if (stock < cant)
                 {
                     trans.Rollback();
-                    return Resultado.Mal($"Stock insuficiente del producto {prod}: quedan {stock}");
+                    return Resultado.Mal($"Ez dago nahikoa izakin {prod} produktuan: {stock} unitate geratzen dira");
                 }
             }
 
@@ -772,7 +772,7 @@ public static class GestorOperaciones
     private static Resultado Ped_Cancelar(SesionUsuario ses, JsonElement d)
     {
         var idPedido = Int(d, "idPedido");
-        if (idPedido <= 0) return Resultado.Mal("Falta el id del pedido");
+        if (idPedido <= 0) return Resultado.Mal("Eskaeraren IDa falta da");
 
         return Escritura(con =>
         {
@@ -780,10 +780,10 @@ public static class GestorOperaciones
             c.CommandText = @"SELECT idUsuario, estado FROM Pedido WHERE id = @p";
             c.Parameters.AddWithValue("@p", idPedido);
             using var r = c.ExecuteReader();
-            if (!r.Read()) return Resultado.Mal("Pedido no encontrado");
+            if (!r.Read()) return Resultado.Mal("Ez da eskaera aurkitu");
             if (ses.Rol != "admin" && r.GetInt64(0) != ses.IdUsuario)
-                return Resultado.Mal("Ese pedido no es tuyo");
-            if (r.GetString(1) != "abierta") return Resultado.Mal("El pedido ya no esta abierto");
+                return Resultado.Mal("Eskaera hori ez da zurea");
+            if (r.GetString(1) != "abierta") return Resultado.Mal("Eskaera ez dago irekita");
 
             using var u = con.CreateCommand();
             u.CommandText = "UPDATE Pedido SET estado = 'anulada' WHERE id = @p";
@@ -796,7 +796,7 @@ public static class GestorOperaciones
     private static Resultado Ped_Ticket(JsonElement d)
     {
         var idPedido = Int(d, "idPedido");
-        if (idPedido <= 0) return Resultado.Mal("Falta el id del pedido");
+        if (idPedido <= 0) return Resultado.Mal("Eskaeraren IDa falta da");
 
         using var con = BaseDatos.Conectar();
         con.Open();
@@ -808,7 +808,7 @@ public static class GestorOperaciones
                                WHERE p.id = @p";
             c.Parameters.AddWithValue("@p", idPedido);
             using var r = c.ExecuteReader();
-            if (!r.Read()) return Resultado.Mal("Pedido no encontrado");
+            if (!r.Read()) return Resultado.Mal("Ez da eskaera aurkitu");
             cliente = r.GetString(0); fecha = r.GetString(1);
             estado = r.GetString(2); total = r.GetDouble(3);
         }
