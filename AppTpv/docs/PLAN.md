@@ -1,60 +1,66 @@
-# PLAN — AppTpv (Erronka WID+ZPP)
+# PLANA — AppTpv (WID+ZPP Erronka)
 
-## Fase 1 — Completada ✅ (2/11/2026)
+## 1. Fasea — Osatuta ✅ (2026/02/11)
 
-- [x] Solución `AppTpv.sln` con proyecto `ServidorTPV` (console, net10.0)
-- [x] Paquete `Microsoft.Data.Sqlite` integrado
-- [x] Esquema SQLite completo (`Data/Esquema.sql`) cubriendo TODOS los requisitos de la erronka:
+- [x] `AppTpv.slnx` soluzioa `ZerbitzariaTPV` proiektuarekin (kontsola, net10.0)
+- [x] `Microsoft.Data.Sqlite` paketea integratuta
+- [x] SQLite eskema osoa (`Datuak/Eskema.sql`), erronkaren baldintza GUZTIAK estaltzen dituena:
   - Usuario/rol (admin | usuario) + passHash
-  - Mesa, Reserva (fecha NULL = sin fecha, turno bazkaria/afaria)
-  - Producto con **stock** e **ingredientes (osagaiak)**
-  - Pedido/LineaPedido (ticket + decremento de stock al confirmar)
-- [x] `BaseDatos.Inicializar()` crea la BD sola al primer arranque
-- [x] Lock global de escrituras (`LockEscritura`) preparado (exigencia de concurrencia del enunciado)
-- [x] Semillas: admin/admin123, 3 mesas (cap. 4/4/6), 4 productos con stock
-- [x] Verificado: `dotnet run` → "BD OK -> usuarios=1 mesas=3 productos=4"
+  - Mesa, Reserva (`fecha` NULL = data gabe, `turno` bazkaria/afaria)
+  - Producto **stock** eta **ingredientes** (osagaiak) eremuekin
+  - Pedido/LineaPedido (ticket-a + kobratzean stocka murriztu)
+- [x] `DatuBasea.Hasieratu()`-ek BD bera sortzen du lehen abiaraztean
+- [x] Idazketen lock globala (`IdazketaBlokeoa`) prest (enuntziatuaren konkurrentzia-eskakizuna)
+- [x] Haziak: 17 erabiltzaile (`admin` + 15 berri, pasahitza `1234`), 3 mahai (4/4/6 plaza), 21 produktu
+- [x] Egiaztatuta: `dotnet run` → `BD OK -> erabiltzaileak=17 mahaiak=3 produktuak=21`
 
-## Fase 2 — Completada ✅ (2/11/2026)
+## 2. Fasea — Osatuta ✅ (2026/02/11)
 
-### Qué está hecho
-- [x] `Red/ServidorTCP.cs`: TcpListener en **5001** (5000 lo ocupa ControlCenter/AirPlay de macOS),
-      máximo 10 clientes simultáneos (la 11ª recibe `{"error":"SESSION_LIMIT"}`), un hilo por cliente
-- [x] `Red/ClienteConexion.cs`: framing JSON una-línea-por-mensaje, dispatch por token/acción, LOGOUT
-- [x] `Servicios/Sesiones.cs`: token GUID tras LOGIN, diccionario concurrente, contador de sesiones
-- [x] `Servicios/GestorOperaciones.cs`: **19 acciones** del protocolo con guardas de rol
-      (RequiereAdmin / RequiereSesion), lock global de escritura + transacciones
-- [x] `Program.cs` arranca BD + TCP; comando "parar" para cierre limpio
+### Zer dago eginda
 
-### Bugs corregidos durante las pruebas
-- FKs mal referenciadas en `Esquema.sql` (`Mesa(idMesa)`/`Usuario(idUsuario)` → `...id`):
-  provocaba "foreign key mismatch" al crear Reservas y Pedidos
-- `INSERT ... ExecuteScalar()` devolvía 0 → `RETURNING id` en Res_Crear y Ped_Abrir
+- [x] `Sarea/TCPZerbitzaria.cs`: TcpListener **5001** atakan (5000 macOS-eko ControlCenter/AirPlay-ek okupatzen du),
+      gehienez 10 bezero aldi berean (11.a `{"errorea":"SESSION_LIMIT"}` mezuarekin baztertzen da), bezero bakoitzeko hari bat
+- [x] `Sarea/BezeroKonexioa.cs`: JSON framing-a (lerro bat = mezu bat), token/ekintzaren araberako banaketa, LOGOUT
+- [x] `Zerbitzuak/Saioak.cs`: GUID tokena LOGIN ondoren, mapa konkurrentea, saio-kontagailua
+- [x] `Zerbitzuak/EragiketaKudeatzailea.cs`: protokoloko **20 ekintza** rol-guardekin
+      (`AdminEskatzenDu` / `SaioaEskatzenDu`), idazketa-lock globala + transakzioak
+- [x] `Programa.cs`-ek BD + TCP abiarazten ditu; `parar` komandoa ixteko
 
-### Evidencias de pruebas (cliente TCP de node, suite de 40 pasos)
-- LOGIN correcto/incorrecto, USUARIO_CREAR (+duple, +rol inválido), USUARIOS_LISTA
-- Guardas de rol: "Accion reservada al administrador" para un usuario corriente
-- Acciones sin token: "No hay sesion abierta (falta el token)"
-- MESAS_LISTA / PRODUCTOS_LISTA con usuario común
-- RESERVA_CREAR: sin fecha ✅, con fecha ✅, duple rechazada ✅, capacidad rechazada
-  ("La mesa admite como maximo 4 comensales"), turno inválido, formato de fecha
-- RESERVA_LISTA (total y filtrada por fecha), MODIFICAR, BORRAR (cancelada), otra persona/sin id
-- PEDIDO_ABRIR, AGREGAR_LINEA (+stock insuficiente: "quedan 12"), producto inexistente
-- PEDIDO_CONFIRMAR: total 30 ✅ y **decremento de stock verificado** (Prentxikoa 12 → 2)
-- AGREGAR tras cobrar rechazado, segundo pedido, "Ya tienes el pedido 2 abierto", cancelar
-- TICKET_OBTENER: cliente, fecha, estado cobrada, lineas, total ✅
-- LOGOUT y acción tras logout rechazada
-- Límite de 10 clientes: script con 11 conexiones → la 11ª rechazada con SESSION_LIMIT
+### Probekin zuzendutako akatsak
 
-### Fichero de BD durante pruebas
+- `Eskema.sql`-eko FK okerrak (`Mesa(idMesa)`/`Usuario(idUsuario)` → `...id`):
+  `foreign key mismatch` eragiten zuten Reserva eta Pedido sortzean
+- `INSERT ... ExecuteScalar()`-ek 0 itzultzen zuen → `RETURNING id` erabiltzen da `Erres_Sortu` eta `Ped_Abrir`-en
+
+### Proben frogak (node TCP bezeroa, 40 urratseko suitea)
+
+- LOGIN zuzena/okerra, USUARIO_CREAR (+bikoiztua, +rol okerra), USUARIOS_LISTA
+- Rol-guardak: "Ekintza hau administratzaileentzat bakarrik dago baimenduta" erabiltzaile arruntarentzat
+- Tokenik gabeko ekintzak: "Ez dago saio aktiborik (tokena falta da)"
+- MESAS_LISTA / PRODUCTOS_LISTA erabiltzaile arruntarekin
+- RESERVA_CREAR: data gabe ✅, datarekin ✅, bikoiztua baztertuta ✅, edukiera baztertuta
+  ("Mahaiak gehienez 4 lagun onartzen ditu"), txanda okerra, data-formatu okerra
+- RESERVA_LISTA (guztira eta dataren arabera iragazita), MODIFICAR, BORRAR (cancelada), beste batenak/id gabe
+- PEDIDO_ABRIR, AGREGAR_LINEA (+izakin nahiko ez: "N unitate geratzen dira"), produktu inexistentea
+- PEDIDO_CONFIRMAR: guztira 30 € ✅ eta **izakin-murrizketa egiaztatuta**
+- Kobratu ondoren AGREGAR baztertuta, bigarren eskaera, "Zure 2 zenbakiko eskaera irekita dago", cancelar
+- TICKET_OBTENER: bezeroa, data, `cobrada` egoera, lerroak, guztira ✅
+- LOGOUT eta logout ondorengo ekintza baztertuta
+- 10 bezeroen muga: 11 koneksioko script-a → 11.a `SESSION_LIMIT` erantzunarekin baztertuta
+
+### Probekin erabilitako BD fitxategia
+
 ```
-AppTpv/ServidorTPV/bin/Debug/net10.0/data/tpv.db   (se recrea con semillas si se borra)
+AppTpv/ZerbitzariaTPV/bin/Debug/net10.0/data/tpv.db   (ezabatuz gero haziekin birsortzen da)
 ```
 
-### Pendientes conocidos (no bloqueantes)
-- Mensaje "Cliente desconectado" del log a veces desordenado (contador leído entre hilos): cosmético
-- RESERVA_MODIFICAR no revalida capacidad/duple al cambiar mesa/fecha: pulirlo si la UI lo pide
-- Copias de seguridad de BD y credenciales documentadas: para la entrega final
+### Ezagutzen diren zain egongoak (ez blokeatzaileak)
 
-## Próxima parada — Fase 3
-ClienteWPF: las 5 interfaces del enunciado sobre `docs/PROTOCOLO.md`, probado en la VM UTM
-(Windows); carpetas compartidas de UTM para pasar binarios. El servidor ya cumple el contrato.
+- "Bezeroa deskonektatuta" log-mezua batzuetan desordenatuta agertzen da (kontagailua hariren artean irakurtzen da): kosmetikoa
+- RESERVA_MODIFICAR-ek ez du edukiera/bikoiztua berriro baliozkotzen mahia/data aldatzean: UI-ak eskatuz gero landu
+- BDren babeskopiak eta kredentzialen dokumentua: azken entregarako
+
+## Hurrengo geltokia — 3. Fasea
+
+`BezeroaWPF`: enuntziatuko 5 interfazeak `docs/PROTOCOLO.md` kontratuaren gainean, Windows VM-an probatuta
+(UTM); binarioak pasatzeko UTM karpeta partekatuak. Zerbitzariak dagoeneko betetzen du kontratua.

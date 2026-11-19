@@ -1,0 +1,64 @@
+<!-- ============================================================
+  AppTpv — Interfaz 4 de 5: ADMINISTRACION DE USUARIOS
+  Solo visible para el rola admin (requisito 2): crear erabiltzaileak,
+  cambiar contrasena/izena/rola y deshabilitar.
+============================================================ -->
+<UserControl x:Class="BezeroaWPF.Ikuspegiak.ErabiltzaileIkuspegia"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+            <TextBlock Text="Erabiltzaileen kudeaketa" FontSize="15"
+                       FontWeight="Bold" Margin="0,0,0,10"/>
+
+            <TextBlock Text="Erabiltzaile-izena:"/>
+            <TextBox x:Name="TxtErabiltzailea" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Pasahitza:"/>
+            <PasswordBox x:Name="TxtPasahitza" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Izena:"/>
+            <TextBox x:Name="TxtIzena" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Rola:"/>
+            <ComboBox x:Name="CboRola" SelectedIndex="1" Margin="0,2,0,10">
+                <ComboBoxItem Content="Administratzailea" Tag="admin"/>
+                <ComboBoxItem Content="Erabiltzailea" Tag="usuario"/>
+            </ComboBox>
+
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="BtnSortu" Content="Sortu" Width="90" Margin="0,0,6,0"
+                        Background="#2E7D32" Foreground="White" Click="BtnSortu_Click"/>
+                <Button x:Name="BtnGorde" Content="Gorde aldaketak" Width="130" Margin="0,0,6,0"
+                        Click="BtnGorde_Click"/>
+                <Button x:Name="BtnDesgaitu" Content="Desgaitu" Width="100"
+                        Click="BtnDesgaitu_Click"/>
+            </StackPanel>
+            <TextBlock x:Name="TxtAbisua" Foreground="Red" TextWrapping="Wrap" Margin="0,8,0,0"/>
+        </StackPanel>
+
+        <DockPanel Grid.Column="1">
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Text="Sistemako erabiltzaileak" FontSize="15" FontWeight="Bold"
+                           VerticalAlignment="Center"/>
+                <Button x:Name="BtnEguneratu" Content="Eguneratu" Width="90" Margin="12,0,0,0"
+                        Click="BtnEguneratu_Click"/>
+            </StackPanel>
+            <DataGrid x:Name="GridErabiltzaileak" AutoGenerateColumns="False" IsReadOnly="True"
+                      SelectionChanged="GridErabiltzaileak_SelectionChanged">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="40"/>
+                    <DataGridTextColumn Header="Erabiltzaile-izena" Binding="{Binding ErabiltzaileIzena}" Width="120"/>
+                    <DataGridTextColumn Header="Izena" Binding="{Binding Izena}" Width="*"/>
+                    <DataGridTextColumn Header="Rola" Binding="{Binding RolErakutsi}" Width="110"/>
+                    <DataGridTextColumn Header="Aktibo" Binding="{Binding AktiboErakutsi}" Width="60"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+    </Grid>
+</UserControl>

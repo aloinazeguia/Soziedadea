@@ -3,65 +3,66 @@
 Gida hau `admin` rolarekin logeatzen den pertsonarentzat da.
 Erabiltzaile arrunt batek ez ditu hemen azaldutako pestañak ikusiko.
 
-Interfazeak: `ClienteWPF/Vistas/VistaStock.xaml` eta
-`ClienteWPF/Vistas/VistaUsuarios.xaml` (biak `VentanaPrincipal.xaml`-eko
+Interfazeak: `BezeroaWPF/Ikuspegiak/IzakinIkuspegia.xaml` eta
+`BezeroaWPF/Ikuspegiak/ErabiltzaileIkuspegia.xaml` (biak `LeihoNagusia.xaml`-eko
 `TabControl`-ean daude).
 
 ## Saioa hasi
 
 1. Exekutatu `AppTpv.exe` (zerbitzaria martxan egon behar da).
-2. `VentanaLogin` leihoan idatzi:
-   - **Usuario:** `admin`
-   - **Contrasena:** `admin123`
-3. **Entrar** botoia sakatu.
+2. `SaioHasieraLeihoa` leihoan idatzi:
+   - **Erabiltzailea:** `admin`
+   - **Pasahitza:** `admin123`
+3. **Sartu** botoia sakatu.
 
 Goiko barran zure identitatea ikusiko duzu, adibidez:
 `Administrador (admin) — rol: admin`.
-**Usuarios** eta **Stock** pestañak ikusgai daude.
+**Erabiltzaileak** eta **Izakinak** pestañak ikusgai daude.
 
 ---
 
-## 1. Produktu berriak gehitu (**Stock** pestaña)
+## 1. Produktu berriak gehitu (**Izakinak** pestaña)
 
-Formularioa ezkerrean dago (`VistaStock.xaml`):
+Formularioa ezkerrean dago (`IzakinIkuspegia.xaml`):
 
 | Kontrola | Betegarria |
 |---|---|
-| `TxtNombre` | Produktuaren izena (beharrezkoa, bakarra) |
-| `TxtPrecio` | Prezioa eurotan (beharrezkoa, > 0) |
-| `TxtStock` | Hasierako stocka (≥ 0) |
-| `TxtIngredientes` | **Osagaiak**, komaz bereizita (adib. `ogia, haragitxoa, gazta atxurra`) |
-| `TxtCategoria` | Kategoria; hutsik uzten bada `general` ezartzen da |
+| `TxtIzena` | Produktuaren izena (beharrezkoa, bakarra) |
+| `TxtPrezioa` | Prezioa eurotan (beharrezkoa, > 0) |
+| `TxtIzakinak` | Hasierako izakinak (≥ 0) |
+| `TxtOsagaiak` | **Osagaiak**, komaz bereizita (adib. `ogia, haragitxoa, gazta atxurra`) |
+| `TxtKategoria` | Kategoria; hutsik uzten bada `general` ezartzen da |
 
 Urratsak:
 
 1. Bete eremuak.
-2. Sakatu **Crear**.
-3. Mezua `TxtAviso`-n agertzen da (`Producto creado.` edo errorea).
-4. Taula (`GridProductos`) automatikoki freskatzen da.
+2. Sakatu **Sortu**.
+3. Mezua `TxtAbisua`-n agertzen da (`Producto creado` — zerbitzariaren mezu gaztelaniaz,
+   lokalizazio-plana `docs/hizkuntzak.md`-en dago — edo errorea).
+4. Taula (`GridProduktuak`) automatikoki freskatzen da.
 
 > Osagaiak (`ingredientes`) eremuak erronkaren **Ikus Osagaiak** eskakizunari
 > erantzuten dio: produktuaren osagaiak gorde eta gero erakusten dira.
 
 ---
 
-## 2. Biltegiko stocka gehitu / aldatu / ezabatu
+## 2. Biltegiko izakinak gehitu / aldatu / ezabatu
 
-### Stock kopurua aldatu (modu azkarra)
+### Izakinak kopurua aldatu (modu azkarra)
 
-1. Hautatu produktua `GridProductos` taulan — formularioa automatikoki
+1. Hautatu produktua `GridProduktuak` taulan — formularioa automatikoki
    betetzen da.
-2. Idatzi nahi den **kopuru osoa** `TxtNuevoStock` eremuan.
-3. Sakatu **Poner stock**.
+2. Idatzi nahi den **kopuru osoa** `TxtIzakinBerriak` eremuan.
+3. Sakatu **Ezarri izakinak**.
 
 ⚠️ Ekintza honek **balio absolutua** ezartzen du, ez gehikuntza/galera:
-`12` idatziz gero stocka `12` izango da, `+12` ez.
+`12` idatziz gero izakinak `12` izango dira, `+12` ez.
 
 ### Produktuaren gainerako datuak aldatu
 
 1. Hautatu produktua taulan.
 2. Aldatu nahi dituzun eremuak (izena, prezioa, stocka, osagaiak, kategoria).
-3. Sakatu **Guardar cambios**.
+3. Sakatu **Gorde aldaketak**.
 
 `PRODUCTO_MODIFICAR` ekintzak bidalitako eremuak soilik aldatzen ditu;
 hutsik daudenak bezala uzten dira.
@@ -69,63 +70,63 @@ hutsik daudenak bezala uzten dira.
 ### Produktua katalogotik kendu
 
 1. Hautatu produktua taulan.
-2. Sakatu **Quitar**.
+2. Sakatu **Kendu**.
 3. Berretsi `MessageBox`-eko galdera.
 
 Ezabaketa **logikoa** da: `activo = 0` ezartzen da. Produktua ez da agertzen
 kontsumoen kategorien zerrendan, baina lehendik dauden ticketen historia
-mantentzen da. Stocka `0` jartzea beste aukera bat da: orduan txartelak
-**AGOTADO** etiketa erakusten du baina kategorian ikusgai jarraitzen du.
+mantentzen da. Izakinak `0` jartzea beste aukera bat da: orduan txartelak
+**AGORTUTA** etiketa erakusten du baina kategorian ikusgai jarraitzen du.
 
 ### Errore ohikoenak
 
-- `Falta el id del producto` → ez duzu fila bat hautatu.
-- `Nombre y precio son obligatorios (precio > 0)` → formularioa osatu gabe dago.
-- `Producto no encontrado` → produktua ezabatu egin da artean.
+- `Aukeratu zerrendako produktu bat.` → ez duzu fila bat hautatu.
+- `Izena, prezioa (> 0) eta izakinak (>= 0) nahitaezkoak dira.` → formularioa osatu gabe dago.
+- `Produktua ez dago eskuragarri` → produktua desgaitu egin da artean.
 
 ---
 
-## 3. Erabiltzaileak sortu / aldatu / ezabatu (**Usuarios** pestaña)
+## 3. Erabiltzaileak sortu / aldatu / ezabatu (**Erabiltzaileak** pestaña)
 
-Formularioa (`VistaUsuarios.xaml`):
+Formularioa (`ErabiltzaileIkuspegia.xaml`):
 
 | Kontrola | Betegarria |
 |---|---|
-| `TxtLogin` | Saio-hasierako izena (bakarrik sortzean) |
-| `TxtPass` | Pasahitza (sortzean beharrezkoa; aldatzean, hutsik utziz gero ez da aldatzen) |
-| `TxtNombre` | Izena |
-| `CboRol` | `admin` edo `usuario` |
-| `GridUsuarios` | Erabiltzaileen zerrenda |
+| `TxtErabiltzailea` | Saio-hasierako izena (bakarrik sortzean) |
+| `TxtPasahitza` | Pasahitza (sortzean beharrezkoa; aldatzean, hutsik utziz gero ez da aldatzen) |
+| `TxtIzena` | Izena |
+| `CboRola` | `admin` edo `usuario` |
+| `GridErabiltzaileak` | Erabiltzaileen zerrenda |
 
 ### Sortu
 
-1. Idatzi login, pasahitza eta izena.
+1. Idatzi erabiltzaile-izena, pasahitza eta izena.
 2. Aukeratu rola.
-3. Sakatu **Crear**.
-4. `TxtAviso`-n `Usuario <login> creado.` agertzen da eta taula freskatzen da.
+3. Sakatu **Sortu**.
+4. `TxtAbisua`-n `<erabiltzailea> erabiltzailea sortu da.` agertzen da eta taula freskatzen da.
 
 ### Aldatu
 
-1. Hautatu erabiltzailea `GridUsuarios`-en — izena eta rola formularioan
+1. Hautatu erabiltzailea `GridErabiltzaileak`-en — izena eta rola formularioan
    agertzen dira (pasahitza garbitu egiten da, segurtasunagatik).
 2. Aldatu izena, rola eta/edo pasahitza.
-3. Sakatu **Guardar cambios**.
+3. Sakatu **Gorde aldaketak**.
 
 ### Ezabatu (desgaitu)
 
 1. Hautatu erabiltzailea taulan.
-2. Sakatu **Deshabilitar**.
+2. Sakatu **Desgaitu**.
 3. Berretsi galdera.
 
 Erabiltzailea `activo = 0` bihurtzen da: ezin da gehiago logeatu, baina
 erregistroa mantentzen da. Ezin duzu zeure burua desgaitu
-(`No puedes deshabilitarte a ti mismo.`).
+(`Ezin duzu zeure burua desgaitu.`).
 
 ### Errore ohikoenak
 
-- `Login, contrasena y nombre son obligatorios.` → falta den eremua bete.
-- `Ya existe ...` → login-a erabilita dago.
-- `El rol debe ser 'admin' o 'usuario'` → rola baliozkoa aukeratu.
+- `Erabiltzaile-izena, pasahitza eta izena nahitaezkoak dira.` → falta den eremua bete.
+- `Erabiltzaile-izen hori badago lehendik` → login-a erabilita dago.
+- `Aukeratutako rola ez da baliozkoa` → rola baliozkoa aukeratu.
 
 ---
 
@@ -133,6 +134,6 @@ erregistroa mantentzen da. Ezin duzu zeure burua desgaitu
 
 - Ekintza guztiak zerbitzarian egiaztatzen dira berriro: bezeroak pestañak
   ezkutatzea ez da segurtasun-neurri bakarra.
-- Taularen goiko **Refrescar** botoiak datuak birkargatzen ditu (bestelako
+- Taularen goiko **Eguneratu** botoiak datuak birkargatzen ditu (bestelako
   bezero batek aldaketak egin baditu ikusteko).
-- `TxtAviso` eremuak errore-mezuak eta berrespenak erakusten ditu.
+- `TxtAbisua` eremuak errore-mezuak eta berrespenak erakusten ditu.

@@ -10,10 +10,10 @@ independentea*. Hona hemen zati hau defentsan azaltzeko materiala.
 
 | Kontzeptua | Zer da? | AppTpv-n |
 |---|---|---|
-| **Prozesua** | Exekutatzen ari den programa bat; bere memoria-espazioa du. | `ServidorTPV` (konsola) eta bezero bakoitzeko `AppTpv.exe` (WPF). |
+| **Prozesua** | Exekutatzen ari den programa bat; bere memoria-espazioa du. | `ZerbitzariaTPV` (konsola) eta bezero bakoitzeko `AppTpv.exe` (WPF). |
 | **Haria (thread)** | Prozesu barruko exekuzio-fluxua; prozesu bereko memoria partekatzen dute. | Zerbitzariaren entzule-haria, bezero bakoitzeko arreta-haria, WPF-ren UI-haria. |
 | **Socket-a** | Bi prozesuren arteko komunikazio-amaiera (endpoint): **IP + ataka**. TCP-n, byte-fluxu fidela. | Zerbitzaria `0.0.0.0:5001`-en entzuten; bezeroa `IP:5001`-era konektatzen da. |
-| **Zerbitzua** | Erantzukizun jakin bat duen eta besteek erabiltzen duten logika-geruza. | `ServidorTCP`, `Sesiones`, `GestorOperaciones`, `BaseDatos`, bezeroaren `Conexion`... |
+| **Zerbitzua** | Erantzukizun jakin bat duen eta besteek erabiltzen duten logika-geruza. | `TCPZerbitzaria`, `Saioak`, `EragiketaKudeatzailea`, `DatuBasea`, bezeroaren `Konexioa`... |
 
 Analogia: **prozesua** jatetxea da, **hariak** langileak, **socket-a** telefono-lerroa,
 eta **zerbitzuak** sukaldea, kutxa eta erreserben mahaiak: bakoitzak lan bat du
@@ -25,7 +25,7 @@ eta besteek hari deitzen diote.
 
 ```mermaid
 flowchart LR
-    subgraph Prozesua1["ServidorTPV prozesua (Mac/Linux/Windows)"]
+    subgraph Prozesua1["ZerbitzariaTPV prozesua (Mac/Linux/Windows)"]
         DB[("data/tpv.db")]
     end
     subgraph Prozesua2["AppTpv.exe prozesua #1 (Windows)"]
@@ -41,13 +41,13 @@ flowchart LR
 
 - Zerbitzari-prozesu **bakarrak** dauka datu-basea. Bezeroek ez dute DB fitxategia
   irakurtzen: eskaerak bidaltzen dituzte eta zerbitzariak erantzuten du.
-- Bezero bakoitzak **prozesu independientea** da. Batek huts eginez gero,
+- Bezero bakoitza **prozesu independientea** da. Batek huts eginez gero,
   besteek normal jarraitzen dute.
-- Zerbitzaria `ServidorTPV/Program.cs`-en hasten da:
+- Zerbitzaria `ZerbitzariaTPV/Programa.cs`-en hasten da:
 
 ```csharp
-BaseDatos.Inicializar();                                  // DB sortu/haziak
-var servidor = new Thread(ServidorTCP.Instancia.Arrancar) { IsBackground = true };
+DatuBasea.Hasieratu();                                  // DB sortu/haziak
+var servidor = new Thread(TCPZerbitzaria.Instancia.Abiarazi) { IsBackground = true };
 servidor.Start();                                         // entzuteko harixa
 while (true) { if (Console.ReadLine() == "parar") ... }   // prozesua bizirik mantendu
 ```
@@ -66,30 +66,30 @@ egiaztatzeko (`admin` vs `usuario`) eta hainbat makina aldi berean konektatzeko.
 ```mermaid
 flowchart TB
     subgraph Bezeroa
-      A[Ventanas / Vistas<br/>XAML interfazeak] --> B[Servicios/Conexion.cs<br/>garraio-zerbitzua]
-      B --> C[Servicios/Sesion.cs<br/>token eta rola]
-      A --> D[Servicios/Modelos.cs<br/>JSON → objektuak]
+      A[Leihoak / Ikuspegiak<br/>XAML interfazeak] --> B[Zerbitzuak/Konexioa.cs<br/>garraio-zerbitzua]
+      B --> C[Zerbitzuak/Saioa.cs<br/>token eta rola]
+      A --> D[Zerbitzuak/Ereduak.cs<br/>JSON → objektuak]
     end
     C -- "JSON lerro bat" --> E
     subgraph Zerbitzaria
-      E[Red/ServidorTCP.cs<br/>entzun + 10 mugra] --> F[Red/ClienteConexion.cs<br/>protokoloa]
-      F --> G[Servicios/Sesiones.cs<br/>tokenak]
-      F --> H[Servicios/GestorOperaciones.cs<br/>logika + rol guardak]
-      H --> I[(Data/BaseDatos.cs<br/>datu-zerbitzua)]
+      E[Sarea/TCPZerbitzaria.cs<br/>entzun + 10 mugra] --> F[Sarea/BezeroKonexioa.cs<br/>protokoloa]
+      F --> G[Zerbitzuak/Saioak.cs<br/>tokenak]
+      F --> H[Zerbitzuak/EragiketaKudeatzailea.cs<br/>logika + rol guardak]
+      H --> I[(Datuak/DatuBasea.cs<br/>datu-zerbitzua)]
       I --> J[(SQLite)]
     end
 ```
 
 | Zerbitzua | Fitxategia | Zer egiten du |
 |---|---|---|
-| Entzuketa | `Red/ServidorTCP.cs` | Socket-a ireki, 10 bezero onartu, hari bat sortu bakoitzerako |
-| Protokoloa | `Red/ClienteConexion.cs` | Lerroa irakurri, JSON parsedu, `accion` eta `token` atera, erantzuna idatzi |
-| Saioak | `Servicios/Sesiones.cs` | Token GUID → erabiltzailea/rola; `ConcurrentDictionary` |
-| Negozioa | `Servicios/GestorOperaciones.cs` | 20 ekintza, `RequiereAdmin` / `RequiereSesion`, transakzioak |
-| Datuak | `Data/BaseDatos.cs` | SQLite konexioa, eskema, haziak, `LockEscritura` |
-| Segurtasuna | `Data/Seguridad.cs` | SHA-256 + gatz finkoa |
-| Garraioa (bezeroa) | `Servicios/Conexion.cs` | `TcpClient`, bidali/jaso, konexioa berriro ireki |
-| Saioa (bezeroa) | `Servicios/Sesion.cs` | Token, login, rola lokalean |
+| Entzuketa | `Sarea/TCPZerbitzaria.cs` | Socket-a ireki, 10 bezero onartu, hari bat sortu bakoitzerako |
+| Protokoloa | `Sarea/BezeroKonexioa.cs` | Lerroa irakurri, JSON parsedu, `ekintza` eta `token` atera, erantzuna idatzi |
+| Saioak | `Zerbitzuak/Saioak.cs` | Token GUID → erabiltzailea/rola; `ConcurrentDictionary` |
+| Negozioa | `Zerbitzuak/EragiketaKudeatzailea.cs` | 20 ekintza, `AdminEskatzenDu` / `SaioaEskatzenDu`, transakzioak |
+| Datuak | `Datuak/DatuBasea.cs` | SQLite konexioa, eskema, haziak, `IdazketaBlokeoa` |
+| Segurtasuna | `Datuak/Segurtasuna.cs` | SHA-256 + gatz finkoa |
+| Garraioa (bezeroa) | `Zerbitzuak/Konexioa.cs` | `TcpClient`, bidali/jaso, konexioa berriro ireki |
+| Saioa (bezeroa) | `Zerbitzuak/Saioa.cs` | Token, erabiltzaile-izena, rola lokalean |
 
 **Abantaila defentsan:** geruzak bereizita daudenez, rol-egiaztapena zerbitzarian
 bakarrik dago; bezeroak pestañak ezkutatzea aurkezpena baino ez da.
@@ -102,14 +102,14 @@ bakarrik dago; bezeroak pestañak ezkutatzea aurkezpena baino ez da.
 
 | Haria | Non sortzen da | Zer egiten du |
 |---|---|---|
-| Zerbitzariaren hari nagusia | `Program.cs` | DB hasieratu, entzule-haria abiarazi, kontsolaren `parar` irakurri |
-| Entzule-haria | `Program.cs` → `ServidorTCP.Arrancar()` | `AcceptTcpClient()` etengabe; bezero berri bakoitzeko hari bat sortu |
-| Arreta-haria ×N | `ServidorTCP.cs` → `ClienteConexion.Atender()` | Bebero baten mezuak irakurri eta erantzun (blokeatzailea) |
-| WPF UI-haria | Bezeroaren prozesua | XAML kontrolak, klik-gertaerak, `TxtAviso`, `Grid...` eguneraketak |
+| Zerbitzariaren hari nagusia | `Programa.cs` | DB hasieratu, entzule-haria abiarazi, kontsolaren `parar` irakurri |
+| Entzule-haria | `Programa.cs` → `TCPZerbitzaria.Abiarazi()` | `AcceptTcpClient()` etengabe; bezero berri bakoitzeko hari bat sortu |
+| Arreta-haria ×N | `TCPZerbitzaria.cs` → `BezeroKonexioa.Artatu()` | Bezero baten mezuak irakurri eta erantzun (blokeatzailea) |
+| WPF UI-haria | Bezeroaren prozesua | XAML kontrolak, klik-gertaerak, `TxtAbisua`, `Grid...` eguneraketak |
 
 ### Zergatik hari bat bezero bakoitzeko?
 
-`ClienteConexion.Atender()`-ek `lector.ReadLine()` egiten du: **blokeatzen da**
+`BezeroKonexioa.Artatu()`-ek `irakurlea.ReadLine()` egiten du: **blokeatzen da**
 bezeroak zerbait bidali arte. Hari bakarra balitz, bezero batek denbora luzea
 hartuko balu (edo konexioa mantenduz ezer bidali ez), gainerako 9ak itxaron
 egingo lukete. Hari independente batekin, **bakoitza bere erritmoan** doa.
@@ -131,15 +131,15 @@ sequenceDiagram
 
 | Mekanismoa | Non | Zergatik |
 |---|---|---|
-| `Interlocked.Increment/Decrement(ref _clientes)` | `ServidorTCP.cs` | Hainbat hari aldi berean kontadorea aldatzen ari dira; `++` ez da atomikoa |
-| `ConcurrentDictionary` | `Sesiones.cs` | Tokenak hari desberdinetatik gehitu/ezabatu/kontsultatzen dira |
-| `lock (BaseDatos.LockEscritura)` | `BaseDatos.cs` | DB idazketak serializatu; erronkak berak baimentzen du lock bakarra |
-| `lock (_candado)` | `Conexion.cs` (bezeroa) | Bi gertaerk aldi berean bidali ez ditzaten socket berean |
+| `Interlocked.Increment/Decrement(ref _bezeroak)` | `TCPZerbitzaria.cs` | Hainbat hari aldi berean kontadorea aldatzen ari dira; `++` ez da atomikoa |
+| `ConcurrentDictionary` | `Saioak.cs` | Tokenak hari desberdinetatik gehitu/ezabatu/kontsultatzen dira |
+| `lock (DatuBasea.IdazketaBlokeoa)` | `DatuBasea.cs` | DB idazketak serializatu; erronkak berak baimentzen du lock bakarra |
+| `lock (_blokeoa)` | `Konexioa.cs` (bezeroa) | Bi gertaerk aldi berean bidali ez ditzaten socket berean |
 | `IsBackground = true` | hari guztiak | Prozesua itxi ahal izateko |
 
-**Ohartarazpen zintzoa:** bezeroaren `Conexion.Enviar()` sinkronoa da (erantzuna
+**Ohartarazpen zintzoa:** bezeroaren `Konexioa.Bidali()` sinkronoa da (erantzuna
 itxaroten du), baina tokiko sarerako milisegundo batzuk baino ez dira; hala ere,
-`BtnEnviar`-eko `IsEnabled = false` botoiarekin bikoizketak saihesten dira.
+`BtnBidali`-eko `IsEnabled = false` botoiarekin bikoizketak saihesten dira.
 Erantzukizun nagusia zerbitzariaren aldeko hari independentea da: bezero batek
 ez ditu besteak blokeatzen.
 
@@ -157,36 +157,36 @@ du aplikazioak *framing*: **JSON lerro bat = mezu bat**, `\n`-rekin amaituta.
 ### Zerbitzariaren socketaren bizitza
 
 ```csharp
-var ouvinte = new TcpListener(IPAddress.Any, 5001);  // 1. ireki
-ouvinte.Start();                                      // 2. entzun
-var cliente = ouvinte.AcceptTcpClient();               // 3. onartu (blokeatzailea)
-var flujo = cliente.GetStream();                      // 4. byte-fluxua
-var lector = new StreamReader(flujo, Encoding.UTF8);  // 5. irakurri
-var escritor = new StreamWriter(flujo, ...) { AutoFlush = true };
-while ((linea = lector.ReadLine()) != null) { ... }   // 6. mezuak
+var entzulea = new TcpListener(IPAddress.Any, 5001);   // 1. ireki
+entzulea.Start();                                       // 2. entzun
+var bezeroa = entzulea.AcceptTcpClient();                // 3. onartu (blokeatzailea)
+var fluxua = bezeroa.GetStream();                       // 4. byte-fluxua
+var irakurlea = new StreamReader(fluxua, Encoding.UTF8); // 5. irakurri
+var idazlea = new StreamWriter(fluxua, ...) { AutoFlush = true };
+while ((lerroa = irakurlea.ReadLine()) != null) { ... }  // 6. mezuak
 // 7. using blokeek socket-a itxi egiten dute
 ```
 
 ### Bezeroaren socketaren bizitza
 
 ```csharp
-_cliente = new TcpClient();
-_cliente.ConnectAsync(Host, Puerto).Wait(5000);       // 5 s-ko timeout-a
-var flujo = _cliente.GetStream();
-_escritor = new StreamWriter(flujo, new UTF8Encoding(false)) { AutoFlush = true };
-_lector = new StreamReader(flujo, Encoding.UTF8);
+_bezeroa = new TcpClient();
+_bezeroa.ConnectAsync(Ostalaria, Ataka).Wait(5000);  // 5 s-ko timeout-a
+var fluxua = _bezeroa.GetStream();
+_idazlea = new StreamWriter(fluxua, new UTF8Encoding(false)) { AutoFlush = true };
+_irakurlea = new StreamReader(fluxua, Encoding.UTF8);
 ```
 
 ### Mezuaren formatua
 
 ```json
-{"accion":"RESERVA_CREAR","token":"a1b2...","datos":{"idMesa":1,"turno":"bazkaria"}}
+{"ekintza":"RESERVA_CREAR","token":"a1b2...","datuak":{"mahaiId":1,"txanda":"bazkaria"}}
 ```
 
 Erantzuna:
 
 ```json
-{"ok":true,"datos":{"idReserva":7,"mensaje":"Reserva creada"}}
+{"arrakasta":true,"datuak":{"erreserbaId":7,"mezua":"Reserva creada"}}
 ```
 
 ### 10 bezeroen muga
@@ -195,7 +195,7 @@ Erantzuna:
 badira, 11.ari honako hau bidali eta socket-a berehala itxi egiten zaio:
 
 ```json
-{"ok":false,"error":"SESSION_LIMIT","datos":"Servicio lleno (10/10). Reintentelo mas tarde"}
+{"arrakasta":false,"errorea":"SESSION_LIMIT","datuak":"Zerbitzaria beteta dago (10/10). Saiatu berriro geroago"}
 ```
 
 ### Sarea VM-an
@@ -207,9 +207,9 @@ badira, 11.ari honako hau bidali eta socket-a berehala itxi egiten zaio:
 
 ### Konexioa galtzen denean
 
-`Conexion.Enviar()`-ek `SocketException` / `IOException` harrapatu, `Cerrar()`
-deitu eta `No se pudo conectar al servidor IP:ATAKA` mezua itzultzen du.
-Hurrengo eskaeran `AsegurarConexion()` berriro konektatzen saiatzen da.
+`Konexioa.Bidali()`-ek `SocketException` / `IOException` harrapatu, `Itxi()`
+deitu eta `Ezin izan da zerbitzariarekin konektatu. Egiaztatu konexioa eta saiatu berriro.` mezua itzultzen du.
+Hurrengo eskaeran `KonexioaBermatu()` berriro konektatzen saiatzen da.
 
 ---
 
@@ -218,25 +218,25 @@ Hurrengo eskaeran `AsegurarConexion()` berriro konektatzen saiatzen da.
 ```mermaid
 sequenceDiagram
     participant U as Erabiltzailea
-    participant UI as WPF UI-haria (VistaReservas)
-    participant CX as Conexion (bezeroa)
+    participant UI as WPF UI-haria (ErreserbaIkuspegia)
+    participant CX as Konexioa (bezeroa)
     participant AT as Arreta-haria (zerbitzaria)
-    participant GO as GestorOperaciones
+    participant GO as EragiketaKudeatzailea
     participant DB as SQLite (lock bakarra)
 
-    U->>UI: sakatu "Crear" (BtnCrear_Click)
-    UI->>CX: Enviar("RESERVA_CREAR", datos) [lock(_candado)]
+    U->>UI: sakatu "Sortu" (BtnSortu_Click)
+    UI->>CX: Bidali("RESERVA_CREAR", datuak) [lock(_blokeoa)]
     CX->>AT: TCP :5001 → JSON + \n
     AT->>AT: ReadLine + JsonDocument.Parse
-    AT->>AT: token → Sesiones.Obtener → rol
-    AT->>GO: Ejecutar(sesion, accion, datos)
-    GO->>GO: RequiereSesion → Res_Crear (edukiera, bikoiztuta)
-    GO->>DB: lock(LockEscritura) + transakzioa + INSERT
-    DB-->>GO: idReserva
-    GO-->>AT: Resultado.Bien
+    AT->>AT: token → Saioak.Lortu → rol
+    AT->>GO: Exekutatu(saioa, ekintza, datuak)
+    GO->>GO: SaioaEskatzenDu → Erres_Sortu (edukiera, bikoiztuta)
+    GO->>DB: lock(IdazketaBlokeoa) + transakzioa + INSERT
+    DB-->>GO: erreserbaId
+    GO-->>AT: Emaitza.Ondo
     AT-->>CX: JSON + \n (WriteLine)
-    CX-->>UI: Respuesta { Ok, Datos }
-    UI->>UI: TxtAviso = "Reserva creada." + GridReservas freskatu
+    CX-->>UI: Erantzuna { Arrakasta, Datuak }
+    UI->>UI: TxtAbisua = "Reserva creada" + GridErreserbak freskatu
 ```
 
 ---
@@ -260,9 +260,9 @@ sequenceDiagram
 > egiten dira, enunciatuak berak onartzen duena; irakurketak WAL moduan paraleloan
 > doaz.
 >
-> Logika geruzatan dago: `ServidorTCP` socket-ez arduratzen da,
-> `ClienteConexion` protokoloaz, `Sesiones` tokenaz, `GestorOperaciones`
-> negozioaz eta rol-egiaztapenez, eta `BaseDatos` datuaz. Hori dela eta,
+> Logika geruzatan dago: `TCPZerbitzaria` socket-ez arduratzen da,
+> `BezeroKonexioa` protokoloaz, `Saioak` tokenaz, `EragiketaKudeatzailea`
+> negozioaz eta rol-egiaztapenez, eta `DatuBasea` datuaz. Hori dela eta,
 > erabiltzaile arrunt batek ezin du admin-ekintzarik egin, nahiz eta bezeroan
 > pestañak ezkutatuta egon."
 
@@ -281,7 +281,7 @@ sequenceDiagram
 | Zergatik hari bat bezero bakoitzeko? | `ReadLine` blokeatzen delako; bestela bezero geldo batek gainerakoak itxararaziko lituzke. |
 | Zer da IP:ataka bikotea? | Socket baten helbidea. Zerbitzaria `0.0.0.0:5001`-en dago; bezeroak ostalariaren IPa erabiltzen du VM-an. |
 | Nola saihesten da interfazearen blokeoa? | Zerbitzarian hari independente batekin; bezeroan deiak laburrak dira eta botoiak desgaitu egiten dira bikoizketak ekiditeko. |
-| Nola amaitzen da konexioa? | `LOGOUT` mezua (saioa mapatik kentzen du), `App_Exit`, edo errorea gertuz gero `Cerrar()`. |
+| Nola amaitzen da konexioa? | `LOGOUT` mezua (saioa mapatik kentzen du), `App_Exit`, edo errorea gertuz gero `Itxi()`. |
 
 ---
 
@@ -289,14 +289,14 @@ sequenceDiagram
 
 | Kontzeptua | Fitxategia / lerroak |
 |---|---|
-| DB hasieratu + hari nagusiaren hasiera | `ServidorTPV/Program.cs` 11–19 |
-| Ataka eta 10 bezeroen konstanteak | `ServidorTPV/Red/ServidorTCP.cs` 15–16 |
-| `AcceptTcpClient` + `Interlocked` + `SESSION_LIMIT` | `ServidorTPV/Red/ServidorTCP.cs` 32–45 |
-| Bezero bakoitzeko harixa | `ServidorTPV/Red/ServidorTCP.cs` 49–59 |
-| Socket-a, `ReadLine`/`WriteLine`, JSON parse | `ServidorTPV/Red/ClienteConexion.cs` 18–60 |
-| `LOGOUT` zuzenean kudeatuta | `ServidorTPV/Red/ClienteConexion.cs` 52–56 |
-| Saioen mapa konkurrentea | `ServidorTPV/Servicios/Sesiones.cs` 17–34 |
-| Rol guardak | `ServidorTPV/Servicios/GestorOperaciones.cs` 78–89 |
-| Idazketa-lock bakarra | `ServidorTPV/Data/BaseDatos.cs` 22, `GestorOperaciones.cs` 855–863 |
-| Bezeroaren socket-a + timeout + lock | `ClienteWPF/Servicios/Conexion.cs` 37, 59–124 |
-| UI-haria / saioa ixtea | `ClienteWPF/App.xaml.cs` 13–25 |
+| DB hasieratu + hari nagusiaren hasiera | `ZerbitzariaTPV/Programa.cs` 11–19 |
+| Ataka eta 10 bezeroen konstanteak | `ZerbitzariaTPV/Sarea/TCPZerbitzaria.cs` 15–16 |
+| `AcceptTcpClient` + `Interlocked` + `SESSION_LIMIT` | `ZerbitzariaTPV/Sarea/TCPZerbitzaria.cs` 32–45 |
+| Bezero bakoitzeko harixa | `ZerbitzariaTPV/Sarea/TCPZerbitzaria.cs` 49–59 |
+| Socket-a, `ReadLine`/`WriteLine`, JSON parse | `ZerbitzariaTPV/Sarea/BezeroKonexioa.cs` 18–60 |
+| `LOGOUT` zuzenean kudeatuta | `ZerbitzariaTPV/Sarea/BezeroKonexioa.cs` 52–56 |
+| Saioen mapa konkurrentea | `ZerbitzariaTPV/Zerbitzuak/Saioak.cs` 17–34 |
+| Rol guardak | `ZerbitzariaTPV/Zerbitzuak/EragiketaKudeatzailea.cs` 78–89 |
+| Idazketa-lock bakarra | `ZerbitzariaTPV/Datuak/DatuBasea.cs` 22, `EragiketaKudeatzailea.cs` 855–863 |
+| Bezeroaren socket-a + timeout + lock | `BezeroaWPF/Zerbitzuak/Konexioa.cs` 37, 59–124 |
+| UI-haria / saioa ixtea | `BezeroaWPF/App.xaml.cs` 13–25 |

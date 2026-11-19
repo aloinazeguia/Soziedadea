@@ -2,17 +2,17 @@
 
 WID + ZPP **1. Ebaluaketako Erronka**rako garatutako salmenta-puntu (TPV) sistema.
 Bezero-zerbitzari arkitektura, TCP konexioa eta SQLite datu-basea erabiltzen ditu.
-Bezeroaren interfazeak WPF/XAML-ekin daude eginda (`ClienteWPF` proiektua).
+Bezeroaren interfazeak WPF/XAML-ekin daude eginda (`BezeroaWPF` proiektua).
 
 ## Egitura
 
 | Karpeta / fitxategia | Edukia |
 |---|---|
 | `AppTpv.slnx` | Soluzioa: bi proiektu |
-| `ServidorTPV/` | Zerbitzaria: TCP, saioak, negozio-logika, SQLite |
-| `ClienteWPF/` | Bezeroa: 5 interfazeak XAML-en (`Ventanas/`, `Vistas/`) |
-| `docs/PROTOCOLO.md` | TCP protokoloa (gaztelaniaz) |
-| `docs/PLAN.md` | Garapen-plana eta proben frogak (gaztelaniaz) |
+| `ZerbitzariaTPV/` | Zerbitzaria: TCP, saioak, negozio-logika, SQLite |
+| `BezeroaWPF/` | Bezeroa: 5 interfazeak XAML-en (`Leihoak/`, `Ikuspegiak/`) |
+| `docs/PROTOCOLO.md` | TCP protokoloa (gako euskaldunak) |
+| `docs/PLAN.md` | Garapen-plana eta proben frogak |
 | `docs/GIDA_TEKNIKOA.md` | **Gida teknikoa** |
 | `docs/GIDA_ADMIN.md` | **Administratzailearen gida** |
 | `docs/GIDA_ERABILTZAILEA.md` | **Erabiltzailearen gida** |
@@ -30,15 +30,15 @@ Bezeroaren interfazeak WPF/XAML-ekin daude eginda (`ClienteWPF` proiektua).
 
 ```bash
 cd AppTpv
-dotnet run --project ServidorTPV/ServidorTPV.csproj
+dotnet run --project ZerbitzariaTPV/ZerbitzariaTPV.csproj
 ```
 
 Kontsolan honelako mezuak ikusi behar dira:
 
 ```
-BD OK -> usuarios=1 mesas=3 productos=4
-[TCP] Escuchando en el puerto 5001 (max 10 clientes)
-Server running. Escribe 'parar' para cerrar.
+BD OK -> erabiltzaileak=17 mahaiak=3 produktuak=21
+[TCP] 5001 atakan entzuten (gehienez 10 bezero)
+Zerbitzaria martxan. Idatzi 'parar' ixteko.
 ```
 
 Gelditzeko: idatzi `parar` + Enter, edo `Ctrl+C`.
@@ -50,11 +50,11 @@ Gelditzeko: idatzi `parar` + Enter, edo `Ctrl+C`.
 dotnet build AppTpv.slnx -c Release
 
 # Windows VM-rako paketea sortu (self-contained, x64)
-dotnet publish ClienteWPF/ClienteWPF.csproj -c Release \
-  -r win-x64 --self-contained true -o ClienteWPF/publish_vm_x64
+dotnet publish BezeroaWPF/BezeroaWPF.csproj -c Release \
+  -r win-x64 --self-contained true -o BezeroaWPF/publish_vm_x64
 ```
 
-`ClienteWPF/publish_vm_x64/` karpeta osoa Windowsera kopiatu eta `AppTpv.exe`
+`BezeroaWPF/publish_vm_x64/` karpeta osoa Windowsera kopiatu eta `AppTpv.exe`
 exekutatu. (Dagoeneko badago `publish_vm/` eta `publish_vm_x64/` karpetak.)
 
 ### 3. Zerbitzariaren helbidea konfiguratu
@@ -69,22 +69,27 @@ jarri `AppTpv.exe`-rekin batera, lehenengo lerroan `IP:ATAKA`:
 
 ### 4. Saioa hasi
 
-`VentanaLogin` leihoan:
+`SaioHasieraLeihoa` leihoan:
 
-- **Usuario:** `admin`
-- **Contrasena:** `admin123`
+- **Erabiltzailea:** `admin`
+- **Pasahitza:** `admin123`
 
-Bezeroak `VentanaPrincipal` leihoa irekitzen du; bertan rolaren arabera
+Horrez gain, 15 erabiltzaile sortu berri daude (`pasahitza: 1234`), adibidez
+`ane.azkue`. Erregistro horien rola datu-basean `usuario` da; interfazeak
+`Erabiltzailea` erakusten du.
+
+Bezeroak `LeihoNagusia` leihoa irekitzen du; bertan rolaren arabera
 pestaña batzuk ikusgai egongo dira.
 
 ## Datu-basea
 
 - Motorra: **SQLite** (`Microsoft.Data.Sqlite`), fitxategia:
-  - Debug: `ServidorTPV/bin/Debug/net10.0/data/tpv.db`
-  - Release: `ServidorTPV/bin/Release/net10.0/data/tpv.db`
-- Lehen abiaraztean `ServidorTPV/Data/Esquema.sql`-etik sortzen da automatikoki.
-- Hasierako datuak: `admin` erabiltzailea, 3 mahai (4/4/6 plaza) eta 4 produktu
-  stockarekin.
+  - Debug: `ZerbitzariaTPV/bin/Debug/net10.0/data/tpv.db`
+  - Release: `ZerbitzariaTPV/bin/Release/net10.0/data/tpv.db`
+- Lehen abiaraztean `ZerbitzariaTPV/Datuak/Eskema.sql`-etik sortzen da automatikoki.
+- Hasierako datuak: 17 erabiltzaile (`admin` + 15 erabiltzaile berri, pasahitza
+  `1234`), 3 mahai (4/4/6 plaza) eta 21 produktu (kafeak, freskagarriak,
+  garagardoa eta ardoak; lehendik zeuden 4 produktuak ere mantendu dira).
 - SQLite fitxategiak ez du berezko erabiltzaile/pasahitzik; sarbidea aplikazioak
   kontrolatzen du. Pasahitzak **SHA-256 + gatz finkoa** (`AppTpv::ErronkaWIDZPP::2026`)
   gordetzen dira `Usuario.passHash` zutabean.
@@ -96,16 +101,16 @@ martxan badago, erabili SQLite-ren backup mekanismoa (WAL modua dago aktibatuta)
 
 | Erronkaren eskakizuna | Non |
 |---|---|
-| 1.1 Login interfazea | `ClienteWPF/Ventanas/VentanaLogin.xaml` |
-| 1.2 Erabiltzaileen CRUD | `ClienteWPF/Vistas/VistaUsuarios.xaml` |
-| 1.3 Stockaren CRUD | `ClienteWPF/Vistas/VistaStock.xaml` |
-| 1.4 Interfaze nagusia | `ClienteWPF/Vistas/VistaConsumiciones.xaml` |
-| 1.5 Mahai-erreserbak (bazkaria/afaria) | `ClienteWPF/Vistas/VistaReservas.xaml` |
-| 2. Rolak (admin / erabiltzailea) | `ServidorTPV/Servicios/GestorOperaciones.cs` |
-| 3. TCP, 10 bezero, hari bana | `ServidorTPV/Red/ServidorTCP.cs` |
-| 3. Idazketen lock bakarra | `ServidorTPV/Data/BaseDatos.cs` (`LockEscritura`) |
+| 1.1 Login interfazea | `BezeroaWPF/Leihoak/SaioHasieraLeihoa.xaml` |
+| 1.2 Erabiltzaileen CRUD | `BezeroaWPF/Ikuspegiak/ErabiltzaileIkuspegia.xaml` |
+| 1.3 Stockaren CRUD | `BezeroaWPF/Ikuspegiak/IzakinIkuspegia.xaml` |
+| 1.4 Interfaze nagusia | `BezeroaWPF/Ikuspegiak/KontsumizioIkuspegia.xaml` |
+| 1.5 Mahai-erreserbak (bazkaria/afaria) | `BezeroaWPF/Ikuspegiak/ErreserbaIkuspegia.xaml` |
+| 2. Rolak (admin / erabiltzailea) | `ZerbitzariaTPV/Zerbitzuak/EragiketaKudeatzailea.cs` |
+| 3. TCP, 10 bezero, hari bana | `ZerbitzariaTPV/Sarea/TCPZerbitzaria.cs` |
+| 3. Idazketen lock bakarra | `ZerbitzariaTPV/Datuak/DatuBasea.cs` (`LockEscritura`) |
 | 4. Ikus Osagaiak erreserba/kontsumoetan | XAML-eko `ComboBox`, `ListBox`, `DataGrid`, txartel-botoiak |
-| 4. Ticketa + stock eguneratzea | `VistaConsumiciones.xaml.cs` + `Ped_Confirmar` |
+| 4. Ticketa + stock eguneratzea | `KontsumizioIkuspegia.xaml.cs` + `Ped_Confirmar` |
 
 ## Dokumentazio gehiago
 
@@ -113,3 +118,4 @@ martxan badago, erabili SQLite-ren backup mekanismoa (WAL modua dago aktibatuta)
 - [Administratzailearen gida](docs/GIDA_ADMIN.md)
 - [Erabiltzailearen gida](docs/GIDA_ERABILTZAILEA.md)
 - [Aurkezpena: zerbitzuak, prozesuak, hariak eta socketak](docs/AURKEZPENA_ZERBITZUAK_PROZESUAK_HARIAK_SOCKETAK.md)
+- [Hizkuntza-planaren aurkezpena](docs/hizkuntzak.md)
