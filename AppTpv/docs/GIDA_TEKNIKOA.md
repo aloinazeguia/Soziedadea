@@ -75,6 +75,12 @@ eta, fitxategia berria bada, haziak txertatzen ditu.
 - Mahaiak: 1 (4 plaza), 2 (4), 3 (6).
 - Produktuak: Kola kontxa (2,50 € / 24), Kalimotxo (3,00 € / 40),
   Prentxikoa (3,00 € / 12), Sakramento burger (6,50 € / 8).
+- Carta (17 edari, bakoitzeko 20 unitate):
+  - `Kafeak`: Hutsa 1,70 € · Ebakia 1,75 € · kafesnea 1,80 €.
+  - `Freskagarriak`: koka-kola, Limoia, laranja, Tonika, Nestea, Aquarius — 2,50 €.
+  - `Garagardoa`: Zuritoa 1,80 € · Kaña 3,00 € · Botila 2,50 €.
+  - `Ardo Beltzak`: Urtekoa 2,00 € · kriantzak 3,00 €.
+  - `Ardo Txuriak`: Rueda 2,00 € · Berdejo 2,50 € · chardonay 3,00 €.
 
 ## 4. Protokoloa
 

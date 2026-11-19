@@ -73,7 +73,7 @@ public static class BaseDatos
             cmd.ExecuteNonQuery();
         }
 
-        // Productos de ejemplo CON stock (requisito de almacen)
+        // Productos CON stock (requisito de almacen)
         using (var cmd = con.CreateCommand())
         {
             cmd.CommandText = @"
@@ -81,7 +81,29 @@ public static class BaseDatos
                 ('Kola kontxa',   2.5, 24, 'kola, haragi eskuragabea', 'edariak'),
                 ('Kalimotxo',     3.0, 40, 'ardo gorria, pilare',      'edariak'),
                 ('Prentxikoa',    3.0, 12, 'tiegno, flan',             'edariak'),
-                ('Sakramento burger', 6.5, 8, 'ogia, haragitxoa, gazta atxurra', 'janari');";
+                ('Sakramento burger', 6.5, 8, 'ogia, haragitxoa, gazta atxurra', 'janari'),
+
+                ('Hutsa',      1.70, 20, '', 'Kafeak'),
+                ('Ebakia',     1.75, 20, '', 'Kafeak'),
+                ('kafesnea',   1.80, 20, '', 'Kafeak'),
+
+                ('koka-kola',  2.50, 20, '', 'Freskagarriak'),
+                ('Limoia',     2.50, 20, '', 'Freskagarriak'),
+                ('laranja',    2.50, 20, '', 'Freskagarriak'),
+                ('Tonika',     2.50, 20, '', 'Freskagarriak'),
+                ('Nestea',     2.50, 20, '', 'Freskagarriak'),
+                ('Aquarius',   2.50, 20, '', 'Freskagarriak'),
+
+                ('Zuritoa',    1.80, 20, '', 'Garagardoa'),
+                ('Kaña',       3.00, 20, '', 'Garagardoa'),
+                ('Botila',     2.50, 20, '', 'Garagardoa'),
+
+                ('Urtekoa',    2.00, 20, '', 'Ardo Beltzak'),
+                ('kriantzak',  3.00, 20, '', 'Ardo Beltzak'),
+
+                ('Rueda',      2.00, 20, '', 'Ardo Txuriak'),
+                ('Berdejo',    2.50, 20, '', 'Ardo Txuriak'),
+                ('chardonay',  3.00, 20, '', 'Ardo Txuriak');";
             cmd.ExecuteNonQuery();
         }
     }
