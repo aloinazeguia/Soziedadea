@@ -78,8 +78,12 @@ public partial class SaioHasieraLeihoa : Window
     // Leihoa ixten denean WPFk deitzen duen metodoa gainidazten du.
     protected override void OnClosed(EventArgs e)
     {
-        // Saioa hasteko leihoa bakarrik geratzen bada, zerbitzariarekiko konexioa ixten du.
-        if (Application.Current.Windows.Count <= 1)
+        // WPF-ek leihoa Application.Current.Windows-etik kentzen du Closed gertaera
+        // baino lehen. Beraz, saioa hasi ondoren (leiho nagusia bakarrik geratzen denean)
+        // Count == 1 izango da: konexioa mantendu behar da, bestela zerbitzariak
+        // tokena ezabatu eta hurrengo ekintzek "tokena falta da" errorea ematen dute.
+        // Count == 0 bada ez dago leihorik (aplikazioa ixten ari da): orduan bai itxi.
+        if (Application.Current.Windows.Count == 0)
             Konexioa.Itxi();
         // Oinarrizko Window klasearen itxiera-prozesuarekin jarraitzen du.
         base.OnClosed(e);

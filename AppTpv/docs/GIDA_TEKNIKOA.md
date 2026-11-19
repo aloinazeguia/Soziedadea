@@ -188,7 +188,12 @@ Osagarriak:
   soilik aritu daiteke. Bestela: `Eskaera hori ez da zurea`.
 - Tokenen garbiketa: `LOGOUT` esplizitua ez badago ere, socket-a ixten denean
   `BezeroKonexioa.Artatu()`-ren `finally` blokeak konexio horretako tokenak
-  ezabatzen ditu, saio zaharrak pilatu ez daitezen.
+  ezabatzen ditu, saio zaharrak pilatu ez daitezen. Horregatik, bezeroak
+  **konexio bera mantendu behar du saio osoan**: `SaioHasieraLeihoa.OnClosed`-ek
+  ez du socket-a ixten leiho nagusia irekitzean (WPF-ek leihoa `Windows`
+  bildumatik `Closed` gertaera baino lehen kentzen du; `Count <= 1` egiaztapen
+  oker batek tokena baliogabetzen zuen eta hurrengo ekintzek
+  `Ez dago saio aktiborik (tokena falta da)` errorea ematen zuten).
 
 ## 7. Konkurrentzia
 
