@@ -17,7 +17,14 @@ Interfazeak: `BezeroaWPF/Ikuspegiak/IzakinIkuspegia.xaml` eta
 
 Goiko barran zure identitatea ikusiko duzu, adibidez:
 `Administrador (admin) — rol: admin`.
-**Erabiltzaileak** eta **Izakinak** pestañak ikusgai daude.
+**Erabiltzaileak** eta **Izakinak** pestañak ikusgai daude. Erabiltzaile
+arruntek bezala, **Kontsumizioak**, **Erreserbak** eta **Mahaiak** pestañak
+ere ikusten dituzu.
+
+Administratzaile gisa, edozein eskaera irekiren osagai-zerrenda berreskura
+dezakezu: **Kontsumizioak** pestañan, `PEDIDO_REKUPERATU` ekintzak
+`datuak.eskaeraId` emanda, edo zure azken eskaera irekia ikusteko daturik gabe.
+Erabiltzaile arruntek, aldiz, soilik sortu zuten eskaera ikus dezakete.
 
 ---
 
@@ -133,7 +140,10 @@ erregistroa mantentzen da. Ezin duzu zeure burua desgaitu
 ## Gogoratu
 
 - Ekintza guztiak zerbitzarian egiaztatzen dira berriro: bezeroak pestañak
-  ezkutatzea ez da segurtasun-neurri bakarra.
+  ezkutatzea ez da segurtasun-neurri bakarra. Eskaera irekietan jabetza
+  egiaztatzen da (`Eskaera hori ez da zurea`); admin-ek soilik du salbuespena.
+- Saioa itxi gabe socket-a galtzen bada ere, zerbitzariak tokena garbitzen du
+  konexioa ixten denean; ez dira saio zaharrak pilatzen.
 - Taularen goiko **Eguneratu** botoiak datuak birkargatzen ditu (bestelako
   bezero batek aldaketak egin baditu ikusteko).
 - `TxtAbisua` eremuak errore-mezuak eta berrespenak erakusten ditu.

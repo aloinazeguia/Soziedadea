@@ -1,12 +1,12 @@
 # AppTpv — Erabiltzailearen gida
 
 Gida hau `usuario` rol arruntarekin logeatzen den pertsonarentzat da.
-Bi pestaña baino ez ditu ikusiko: **Kontsumizioak** eta **Erreserbak**.
+Hiru pestaña ikusiko ditu: **Kontsumizioak**, **Erreserbak** eta **Mahaiak**.
 Administrazio-pestañak (**Erabiltzaileak**, **Izakinak**) ezkutatuta egongo dira.
 
 Interfazeak: `BezeroaWPF/Leihoak/SaioHasieraLeihoa.xaml`,
-`Leihoak/LeihoNagusia.xaml`, `Ikuspegiak/KontsumizioIkuspegia.xaml` eta
-`Ikuspegiak/ErreserbaIkuspegia.xaml`.
+`Leihoak/LeihoNagusia.xaml`, `Ikuspegiak/KontsumizioIkuspegia.xaml`,
+`Ikuspegiak/ErreserbaIkuspegia.xaml` eta `Ikuspegiak/MahaiMapaIkuspegia.xaml`.
 
 ## Saioa hasi eta amaitu
 
@@ -116,6 +116,27 @@ Sakatu **Bidali**. Lerro zain guztiak zerbitzarira bidaltzen dira
 (`PEDIDO_AGREGAR_LINEA`) eta berde bihurtzen dira. Stocka ez da oraindik
 kenduko; prezioa zerbitzariak berretsi egiten du.
 
+### Mahaia esleitu
+
+Eskuineko goialdean `CboMahaiak` zerrenda eta **Esleitu** botoia daude.
+Aukeratu mahai bat zerrendatik (7 mahai daude: 1–2 lau plazakoak, 3–4 sei
+plazakoak eta 5–7 hamar plazakoak) eta sakatu **Esleitu**. Eskaera irekia
+mahai horri lotzen zaio; **Mahaiak** pestañan mapa berehala eguneratzen da.
+Eskaera kobratzean mahia automatikoki libre bihurtzen da.
+
+### Osagaiak berriro agertzea (saioa itxi/ireki ondoren)
+
+Zure eskaeraren osagaiak zerbitzaritik gordetzen dira komandan bidali
+bezain laster. Horregatik, **Amaitu saioa** sakatu ondoren berriro sartzen
+bazara —gailu berean nahiz beste batean— eskaera irekia eta haren osagai-zerrenda
+automatikoki agertzen dira **Kontsumizioak** pestaña irekitzean (berdez,
+"bidalita" egoeran), mahaiarekin eta guztizkoarekin batera.
+`Eskaera zk. N · M. mahaia` testuak egoera erakusten du.
+
+Bestelako erabiltzaile batek ezin ditu zure osagaiak ikusi: zerbitzariak
+`Eskaera hori ez da zurea` errorea itzultzen du. Administratzaileak, aldiz,
+edozein eskaera ireki berreskura dezake.
+
 ### Subtotala ikusi
 
 **AZPITOTALA** botoiak produktu bakoitzaren eta guztizkoaren zerrenda
@@ -153,6 +174,19 @@ freskatzen da.
 
 ---
 
+## 3. Mahaien mapa (**Mahaiak** pestaña)
+
+`MahaiMapaIkuspegia.xaml`-ek 7 mahaien egoera erakusten du txartel bakoitzeko:
+
+- **Librea** (berdea): eskaera irekirik eta erreserba aktiborik gabe.
+- **Erreserbatuta** (horia): unean erreserba aktiboa duena.
+- **Okupatuta** (gorria): eskaera irekia duena; `Eskaera zk. N` erakusten du.
+
+**Freskatu** botoiak zerbitzaritik egoera berriro ekartzen du
+(`MESAS_LISTA`). Mapa erabiltzaile guztientzat ikusgai dago.
+
+---
+
 ## Laburpena: erronkaren eskakizunak gidan
 
 | Eskakizuna | Non ikusten den |
@@ -161,5 +195,8 @@ freskatzen da.
 | Ikus Osagaiak produktuak aukeratzean | `ListaKategoriak`, txartel-botoiak, `EditorePanela` |
 | Ticketa produktu/kantitate/guztizkoarekin | **IKUSI TIKETA** (`BtnTicket_Click`) |
 | Erosketa baieztatzean stocka automatikoki eguneratu | **KOBRATU** → `PEDIDO_CONFIRMAR` → `Eska_Baieztatu` |
+| Saioa itxi/ireki ondoren osagaiak berreskuratu | **Kontsumizioak** pestaña irekitzean (`PEDIDO_REKUPERATU`) |
+| Eskaera mahaiari lotu | `CboMahaiak` + **Esleitu** (`PEDIDO_MAHAIA_ESLEITU`) |
+| 7 mahaien egoera bisualak | **Mahaiak** pestaña (`MahaiMapaIkuspegia`) |
 | Bazkaria/afaria bereizita | `CboTxanda` |
 | Data zehaztu gabea onartuta | `TxtData` hutsik |

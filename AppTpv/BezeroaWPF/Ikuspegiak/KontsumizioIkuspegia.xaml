@@ -249,9 +249,21 @@
                                FontSize="24" FontWeight="Bold"/>
                 </Border>
             </Grid>
-            <TextBlock x:Name="TxtEskaeraEgoera" Grid.Row="1" Text="Ez dago eskaera irekirik"
-                       Foreground="#B8BFC9" FontSize="11"
-                       HorizontalAlignment="Center" Margin="20,8,20,0"/>
+            <!-- Mahaiaren hautaketa: eskaera irekia mahaiari lotzen zaio kobratu arte -->
+            <StackPanel Grid.Row="1" Margin="20,8,20,0">
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" x:Name="BtnMahiaEsleitu"
+                            Content="Esleitu" Width="62" Height="26" FontSize="11"
+                            Style="{StaticResource KomanderoBotoia}"
+                            Background="#7FA8D6" Click="BtnMahiaEsleitu_Click"/>
+                    <ComboBox x:Name="CboMahaiak" Height="26" FontSize="12"
+                              DisplayMemberPath="Deskribapena" SelectedValuePath="Id"
+                              Margin="0,0,8,0"/>
+                </DockPanel>
+                <TextBlock x:Name="TxtEskaeraEgoera" Text="Ez dago eskaera irekirik"
+                           Foreground="#B8BFC9" FontSize="11"
+                           HorizontalAlignment="Center" Margin="0,6,0,0"/>
+            </StackPanel>
 
             <!-- Lineas del pedido -->
             <ListBox x:Name="ListaEskaera" Grid.Row="2" Margin="20,0,20,0"

@@ -7,6 +7,9 @@
 - **Bezero bakoitzeko hari bat** (irakurketa blokeatzailea); bezeroaren UI-a ez da
   blokeatzen zerbitzariak erantzuten duen bitartean.
 - Markoa: **lerro bat = mezu bat** (`\n` bereizgailua). JSON UTF-8.
+- Socket-a ixten denean (LOGOUT esplizitua ez badago ere), zerbitzariak konexio
+  horretan sortutako tokenak automatikoki ezabatzen ditu `try/finally` bidez;
+  horrela saioa ireki/itxi errepikatzean ez dira token zaharrak pilatzen.
 
 ## Mezuaren formatua
 
@@ -42,6 +45,7 @@ Gakoen mapa (protokoloa euskaratu da):
 | `ingredientes` / `categoria` / `activo` | `osagaiak` / `kategoria` / `aktibo` |
 | `numMesa` / `capacidad` | `mahaiZenbakia` / `edukiera` |
 | `idMesa` / `idReserva` | `mahaiId` / `erreserbaId` |
+| `estado` (mahaiaren mapa) | `egoera` (`librea` / `erreserbatuta` / `okupatuta`) |
 | `fecha` / `turno` / `numComensales` | `data` / `txanda` / `pertsonaKopurua` |
 | `nombreCliente` / `observaciones` / `estado` | `bezeroIzena` / `oharrak` / `egoera` |
 | `idPedido` / `idProducto` / `cantidad` | `eskaeraId` / `produktuId` / `kopurua` |
@@ -71,7 +75,7 @@ berdin mantentzen dira, erabiltzaile-interfazeak "Administratzailea" /
 | `STOCK_MODIFICAR` | admin | id, izakinak | arrakasta |
 | `USUARIOS_LISTA` | admin | – | erabiltzaileak |
 | `USUARIO_CREAR / _MODIFICAR / _BORRAR` | admin | erabiltzailea, pasahitza, izena, rola... | arrakasta |
-| `MESAS_LISTA` | saioa | – | mahaiak |
+| `MESAS_LISTA` | saioa | – | mahaiak (id, mahaiZenbakia, edukiera, erreserbak, eskaeraId, egoera) |
 | `RESERVA_CREAR` | saioa | mahaiId, data (aukerakoa), txanda, pertsonaKopurua | erreserbaId |
 | `RESERVA_MODIFICAR / _BORRAR` | saioa | erreserbaId + aldaketak | arrakasta |
 | `RESERVA_LISTA` | saioa | data, txanda (aukerakoak) | erreserbak |
@@ -79,8 +83,24 @@ berdin mantentzen dira, erabiltzaile-interfazeak "Administratzailea" /
 | `PEDIDO_AGREGAR_LINEA` | saioa | eskaeraId, produktuId, kopurua | prezioUnitarioa; izakinak egiaztatzen ditu |
 | `PEDIDO_CONFIRMAR` | saioa | eskaeraId | guztira + izakinak murriztu (lock berean) |
 | `PEDIDO_CANCELAR` | saioa | eskaeraId | arrakasta |
-| `TICKET_OBTENER` | saioa | eskaeraId | txartela (lerroak + guztira) |
+| `PEDIDO_REKUPERATU` | saioa | eskaeraId (aukerakoa) | eskaeraId, mahaiId, mahaiZenbakia, lerroak (produktuId, izena, kopurua, prezioUnitarioa) |
+| `PEDIDO_MAHAIA_ESLEITU` | saioa | eskaeraId, mahaiId | arrakasta; mapak mahia okupatuta erakusten du |
+| `TICKET_OBTENER` | saioa | eskaeraId | txartela (lerroak + guztira); jabeak/admin-ek soilik |
 | `LOGOUT` | saioa | – | saioa itxi (bereziki kudeatzen da) |
+
+### Eskaera irekiaren berreskuratzea
+
+Saioa itxi eta berriro irekitzean (gailu berean nahiz beste batean), bezeroak
+`PEDIDO_REKUPERATU` deitzen du `Loaded` gertaeran. Zerbitzariak BDn gordetako
+`estado = 'abierta'` eskaera eta haren `LineaPedido` erregistroak itzultzen ditu;
+bezeroak `_eskaeraId`, `_lerroak` ("bidalita") eta mahai-hautaketa berreraikitzen
+ditu. `datuak.eskaeraId` ematen bada, eskaera zehatz hori berreskuratzen da
+(admin-ek beste erabiltzaile baten eskaera ere berreskura dezake).
+
+Eskaera irekiak **sortzaileak edo administratzaileak** soilik ikusi/berreskuratu
+ditzake: `PEDIDO_REKUPERATU`, `PEDIDO_AGREGAR_LINEA`, `PEDIDO_CONFIRMAR`,
+`PEDIDO_CANCELAR`, `PEDIDO_MAHAIA_ESLEITU` eta `TICKET_OBTENER` ekintzetan
+jabetza egiaztatzen da. Bestela: `{ "arrakasta": false, "errorea": "Eskaera hori ez da zurea" }`.
 
 ## Aldiberekotasuna
 - **Lock global bakarra** zerbitzarian DB idazketa-sekuentzia guztien inguruan

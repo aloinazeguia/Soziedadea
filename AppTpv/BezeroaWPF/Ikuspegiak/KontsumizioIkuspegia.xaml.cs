@@ -22,11 +22,13 @@ public partial class KontsumizioIkuspegia : UserControl
 {
     private int _eskaeraId;               // 0 = oraindik eskaerarik gabe
     private int _azkenEskaeraId;          // kobratutako azken eskaera (txartela ikusteko)
+    private int _mahaiId;                 // eskaera irekiari lotutako mahia (0 = gabe)
 
     // Komandaren lerroak: zainak (lokala) + bidalitakoak (komanda)
     private readonly List<EskaeraLerroa> _lerroak = new();
 
     private List<ProduktuDatuak> _menua = new();
+    private List<MahaiDatuak> _mahaiak = new();
     private string _kategoriaUnekoa = "";
 
     public KontsumizioIkuspegia()
@@ -35,7 +37,8 @@ public partial class KontsumizioIkuspegia : UserControl
         Loaded += (_, _) =>
         {
             MenuaKargatu();
-            EskaeraEguneratu();
+            MahaiakKargatu();
+            EskaeraBerreskuratu();   // gailu berean zein bestean: saioa irekitzean osagaiak agertu
         };
     }
 
@@ -69,6 +72,100 @@ public partial class KontsumizioIkuspegia : UserControl
 
         var indizea = kategoriak.IndexOf(_kategoriaUnekoa);
         ListaKategoriak.SelectedIndex = indizea >= 0 ? indizea : 0;
+    }
+
+    // ---------- Mahaiak / eskaera irekiaren berreskuratzea ----------
+
+    private void MahaiakKargatu()
+    {
+        var r = Konexioa.Bidali("MESAS_LISTA");
+        if (!r.Arrakasta) return;
+
+        _mahaiak = JsonSerializer.Deserialize<List<MahaiDatuak>>(
+            r.Datuak.GetProperty("mahaiak").GetRawText()) ?? new();
+        CboMahaiak.ItemsSource = _mahaiak;
+    }
+
+    /// <summary>
+    /// Saioa itxi/ireki ondoren (gailu berean nahiz beste batean) zerbitzariari
+    /// eskatzen dio ordaindu gabeko eskaera eta haren osagai-zerrenda.
+    /// Datuak BDn daudenez, UI-egoera berreraiki egiten da.
+    /// </summary>
+    private void EskaeraBerreskuratu()
+    {
+        var r = Konexioa.Bidali("PEDIDO_REKUPERATU");
+        if (!r.Arrakasta)
+        {
+            TxtMenuInfo.Text = r.Errorea;
+            return;
+        }
+
+        var berreskuratua = JsonSerializer.Deserialize<EskaeraBerreskuratzea>(
+            r.Datuak.GetRawText());
+        if (berreskuratua == null || berreskuratua.EskaeraId == 0)
+        {
+            _eskaeraId = 0;
+            _mahaiId = 0;
+            _lerroak.Clear();
+            CboMahaiak.SelectedIndex = -1;
+            EskaeraEguneratu();
+            return;
+        }
+
+        _eskaeraId = berreskuratua.EskaeraId;
+        _mahaiId = berreskuratua.MahaiId ?? 0;
+        _lerroak.Clear();
+        foreach (var l in berreskuratua.Lerroak)
+        {
+            _lerroak.Add(new EskaeraLerroa
+            {
+                ProduktuId = l.ProduktuId,
+                Izena = l.Izena,
+                Kopurua = l.Kopurua,
+                PrezioUnitarioa = l.PrezioUnitarioa,
+                Egoera = "bidalita"
+            });
+        }
+
+        if (_mahaiId > 0)
+            CboMahaiak.SelectedValue = _mahaiId;
+        EskaeraEguneratu();
+
+        if (_lerroak.Count > 0)
+            TxtMenuInfo.Text = $"{_lerroak.Count} osagai berreskuratu dira (eskaera zk. {_eskaeraId}).";
+    }
+
+    /// <summary>Eskaera irekia mahai bati lotzen dio, mapak egoera erakutsi dezan.</summary>
+    private void BtnMahiaEsleitu_Click(object sender, RoutedEventArgs e)
+    {
+        if (CboMahaiak.SelectedItem is not MahaiDatuak mahai)
+        {
+            MessageBox.Show("Aukeratu mahai bat zerrendatik.", "AppTpv",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        if (_eskaeraId == 0)
+        {
+            MessageBox.Show("Lehenik gehitu produktuak eta bidali eskaera.", "AppTpv",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var r = Konexioa.Bidali("PEDIDO_MAHAIA_ESLEITU", new
+        {
+            eskaeraId = _eskaeraId,
+            mahaiId = mahai.Id
+        });
+        if (!r.Arrakasta)
+        {
+            MessageBox.Show(r.Errorea, "Ezin izan da mahaia esleitu", MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
+        _mahaiId = mahai.Id;
+        EskaeraEguneratu();
+        TxtMenuInfo.Text = $"{mahai.MahaiZenbakia}. mahaia eskaerari lotu zaio.";
     }
 
     private void ListaKategoriak_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -246,7 +343,7 @@ public partial class KontsumizioIkuspegia : UserControl
             _eskaeraId = int.Parse(m.Groups[1].Value);
         }
 
-        TxtEskaeraEgoera.Text = $"Eskaera zk. {_eskaeraId}";
+        EskaeraEguneratu();
         return true;
     }
 
@@ -270,10 +367,13 @@ public partial class KontsumizioIkuspegia : UserControl
         _lerroak.RemoveAll(l => l.Bidalita);
         foreach (var l in bidalitakoak)
         {
-            var produktua = _menua.FirstOrDefault(p => p.Izena == l.Izena);
+            // PEDIDO_REKUPERATUk produktuId ekartzen du; TICKET_OBTENERek izena soilik
+            var produktuId = l.ProduktuId > 0
+                ? l.ProduktuId
+                : _menua.FirstOrDefault(p => p.Izena == l.Izena)?.Id ?? 0;
             _lerroak.Add(new EskaeraLerroa
             {
-                ProduktuId = produktua?.Id ?? 0,
+                ProduktuId = produktuId,
                 Izena = l.Izena,
                 Kopurua = l.Kopurua,
                 PrezioUnitarioa = l.PrezioUnitarioa,
@@ -342,6 +442,8 @@ public partial class KontsumizioIkuspegia : UserControl
         var guztira = r.Datuak.GetProperty("guztira").GetDouble();
         _azkenEskaeraId = _eskaeraId;
         _eskaeraId = 0;
+        _mahaiId = 0;
+        CboMahaiak.SelectedIndex = -1;
         _lerroak.Clear();
         EskaeraEguneratu();
         MenuaKargatu();
@@ -395,9 +497,17 @@ public partial class KontsumizioIkuspegia : UserControl
         var guztira = _lerroak.Sum(l => l.Zenbatekoa);
         TxtTotal.Text = $"{guztira:0.00} €";
 
-        TxtEskaeraEgoera.Text = _eskaeraId == 0
-            ? "Ez dago eskaera irekirik"
-            : $"Eskaera zk. {_eskaeraId}";
+        if (_eskaeraId == 0)
+        {
+            TxtEskaeraEgoera.Text = "Ez dago eskaera irekirik";
+        }
+        else
+        {
+            var mahai = _mahaiak.FirstOrDefault(m => m.Id == _mahaiId);
+            TxtEskaeraEgoera.Text = mahai != null
+                ? $"Eskaera zk. {_eskaeraId} · {mahai.MahaiZenbakia}. mahaia"
+                : $"Eskaera zk. {_eskaeraId}";
+        }
     }
 
     /// <summary>

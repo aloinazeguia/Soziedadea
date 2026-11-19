@@ -52,7 +52,9 @@ public static class EragiketaKudeatzailea
                 "PEDIDO_AGREGAR_LINEA"=> SaioaEskatzenDu(saioa, () => Eska_LerroGehitu(saioa!, datuak)),
                 "PEDIDO_CONFIRMAR"    => SaioaEskatzenDu(saioa, () => Eska_Baieztatu(saioa!, datuak)),
                 "PEDIDO_CANCELAR"     => SaioaEskatzenDu(saioa, () => Eska_BertanBehera(saioa!, datuak)),
-                "TICKET_OBTENER"      => SaioaEskatzenDu(saioa, () => Eska_Txartela(datuak)),
+                "PEDIDO_REKUPERATU"   => SaioaEskatzenDu(saioa, () => Eska_Berreskuratu(saioa!, datuak)),
+                "PEDIDO_MAHAIA_ESLEITU" => SaioaEskatzenDu(saioa, () => Eska_MahaiEsleitu(saioa!, datuak)),
+                "TICKET_OBTENER"      => SaioaEskatzenDu(saioa, () => Eska_Txartela(saioa!, datuak)),
 
                 _ => Emaitza.Txar("Eskatutako ekintza ez da ezagutzen")
             };
@@ -357,11 +359,37 @@ public static class EragiketaKudeatzailea
         using var konexioa = DatuBasea.Konektatu();
         konexioa.Open();
         using var agindua = konexioa.CreateCommand();
-        agindua.CommandText = "SELECT id, numMesa, capacidad FROM Mesa ORDER BY numMesa";
+        // Egoera: eskaera irekia badago -> okupatuta; bestela gaurko/ data gabe erreserba badago
+        // -> erreserbatuta; bestela librea. id, mahaiZenbakia eta edukiera mantentzen dira.
+        agindua.CommandText = @"
+            SELECT m.id, m.numMesa, m.capacidad,
+                   (SELECT COUNT(*) FROM Reserva r
+                     WHERE r.idMesa = m.id AND r.estado = 'activa'
+                       AND (r.fecha IS NULL OR r.fecha = date('now'))) AS erreserbak,
+                   (SELECT p.id FROM Pedido p
+                     WHERE p.idMesa = m.id AND p.estado = 'abierta'
+                     ORDER BY p.id DESC LIMIT 1) AS eskaeraId
+              FROM Mesa m ORDER BY m.numMesa";
         var zerrenda = new List<object>();
         using var r = agindua.ExecuteReader();
         while (r.Read())
-            zerrenda.Add(new { id = r.GetInt32(0), mahaiZenbakia = r.GetInt32(1), edukiera = r.GetInt32(2) });
+        {
+            // 0=id, 1=numMesa, 2=capacidad, 3=erreserbak, 4=eskaeraId
+            var erreserbak = Convert.ToInt32(r.GetValue(3));
+            var eskaeraId = r.IsDBNull(4) ? (int?)null : Convert.ToInt32(r.GetValue(4));
+            var egoera = eskaeraId != null ? "okupatuta"
+                       : erreserbak > 0 ? "erreserbatuta"
+                       : "librea";
+            zerrenda.Add(new
+            {
+                id = r.GetInt32(0),
+                mahaiZenbakia = r.GetInt32(1),
+                edukiera = r.GetInt32(2),
+                erreserbak,
+                eskaeraId,
+                egoera
+            });
+        }
         return Emaitza.Ondo(new { mahaiak = zerrenda });
     }
 
@@ -667,6 +695,150 @@ public static class EragiketaKudeatzailea
         });
     }
 
+    /// <summary>
+    /// Saioa itxi/ireki ondoren (gailu berean nahiz beste batean) ordaindu gabeko
+    /// eskaeraren osagai-zerrenda BDtik berreskuratzen du. Datuak eskaeraId badakar,
+    /// eskaera hori; bestela erabiltzailearen azken eskaera irekia.
+    /// Jabetza: sortzailea edo admin soilik.
+    /// </summary>
+    private static Emaitza Eska_Berreskuratu(ErabiltzaileSaioa saioa, JsonElement d)
+    {
+        var eskaeraId = Zenbakia(d, "eskaeraId");
+
+        using var konexioa = DatuBasea.Konektatu();
+        konexioa.Open();
+
+        int? mahaiId = null;
+        using (var c = konexioa.CreateCommand())
+        {
+            if (eskaeraId > 0)
+            {
+                c.CommandText = @"SELECT id, idUsuario, idMesa, estado FROM Pedido WHERE id = @p";
+                c.Parameters.AddWithValue("@p", eskaeraId);
+            }
+            else
+            {
+                c.CommandText = @"SELECT id, idUsuario, idMesa, estado FROM Pedido
+                                   WHERE idUsuario = @u AND estado = 'abierta'
+                                   ORDER BY id DESC LIMIT 1";
+                c.Parameters.AddWithValue("@u", saioa.ErabiltzaileId);
+            }
+
+            using var r = c.ExecuteReader();
+            if (!r.Read())
+            {
+                if (eskaeraId > 0) return Emaitza.Txar("Ez da eskaera aurkitu");
+                return Emaitza.Ondo(new
+                {
+                    eskaeraId = 0,
+                    mahaiId = (int?)null,
+                    mahaiZenbakia = (int?)null,
+                    lerroak = Array.Empty<object>()
+                });
+            }
+
+            if (saioa.Rola != "admin" && r.GetInt64(1) != saioa.ErabiltzaileId)
+                return Emaitza.Txar("Eskaera hori ez da zurea");
+            if (r.GetString(3) != "abierta")
+                return Emaitza.Txar("Eskaera ez dago irekita (dagoeneko kobratu da)");
+
+            eskaeraId = r.GetInt32(0);
+            mahaiId = r.IsDBNull(2) ? (int?)null : Convert.ToInt32(r.GetValue(2));
+        }
+
+        int? mahaiZenbakia = null;
+        if (mahaiId != null)
+        {
+            using var cm = konexioa.CreateCommand();
+            cm.CommandText = "SELECT numMesa FROM Mesa WHERE id = @m";
+            cm.Parameters.AddWithValue("@m", mahaiId.Value);
+            var zenbakia = cm.ExecuteScalar();
+            if (zenbakia != null) mahaiZenbakia = Convert.ToInt32(zenbakia);
+        }
+
+        var lerroak = new List<object>();
+        using (var c2 = konexioa.CreateCommand())
+        {
+            c2.CommandText = @"
+                SELECT l.idProducto, pr.nombre, l.cantidad, l.precioUnitario
+                  FROM LineaPedido l JOIN Producto pr ON pr.id = l.idProducto
+                 WHERE l.idPedido = @p ORDER BY l.id";
+            c2.Parameters.AddWithValue("@p", eskaeraId);
+            using var r2 = c2.ExecuteReader();
+            while (r2.Read())
+                lerroak.Add(new
+                {
+                    produktuId = r2.GetInt32(0),
+                    izena = r2.GetString(1),
+                    kopurua = r2.GetInt32(2),
+                    prezioUnitarioa = Math.Round(r2.GetDouble(3), 2)
+                });
+        }
+
+        return Emaitza.Ondo(new { eskaeraId, mahaiId, mahaiZenbakia, lerroak });
+    }
+
+    /// <summary>Eskaera irekia mahai bati lotzen dio (mapak okupatuta erakusteko).</summary>
+    private static Emaitza Eska_MahaiEsleitu(ErabiltzaileSaioa saioa, JsonElement d)
+    {
+        var eskaeraId = Zenbakia(d, "eskaeraId");
+        var mahaiId = Zenbakia(d, "mahaiId");
+        if (eskaeraId <= 0 || mahaiId <= 0)
+            return Emaitza.Txar("Eskaeraren IDa eta mahaiaren IDa nahitaezkoak dira");
+
+        return Idazketa(konexioa =>
+        {
+            using var transakzioa = konexioa.BeginTransaction();
+
+            using (var c = konexioa.CreateCommand())
+            {
+                c.Transaction = transakzioa;
+                c.CommandText = "SELECT idUsuario, estado FROM Pedido WHERE id = @p";
+                c.Parameters.AddWithValue("@p", eskaeraId);
+                using var r = c.ExecuteReader();
+                if (!r.Read())
+                {
+                    transakzioa.Rollback();
+                    return Emaitza.Txar("Ez da eskaera aurkitu");
+                }
+                if (saioa.Rola != "admin" && r.GetInt64(0) != saioa.ErabiltzaileId)
+                {
+                    transakzioa.Rollback();
+                    return Emaitza.Txar("Eskaera hori ez da zurea");
+                }
+                if (r.GetString(1) != "abierta")
+                {
+                    transakzioa.Rollback();
+                    return Emaitza.Txar("Eskaera ez dago irekita");
+                }
+            }
+
+            using (var c2 = konexioa.CreateCommand())
+            {
+                c2.Transaction = transakzioa;
+                c2.CommandText = "SELECT COUNT(*) FROM Mesa WHERE id = @m";
+                c2.Parameters.AddWithValue("@m", mahaiId);
+                if (Convert.ToInt32(c2.ExecuteScalar()) == 0)
+                {
+                    transakzioa.Rollback();
+                    return Emaitza.Txar("Mahaia ez da aurkitu");
+                }
+            }
+
+            using (var u = konexioa.CreateCommand())
+            {
+                u.Transaction = transakzioa;
+                u.CommandText = "UPDATE Pedido SET idMesa = @m WHERE id = @p";
+                u.Parameters.AddWithValue("@m", mahaiId);
+                u.Parameters.AddWithValue("@p", eskaeraId);
+                u.ExecuteNonQuery();
+            }
+
+            transakzioa.Commit();
+            return Emaitza.Ondo(new { mezua = "Mahaia esleituta", eskaeraId, mahaiId });
+        });
+    }
+
     // Erosketa baieztatu: egoera cobrada + IZAKIN-MURRIZKETA lock berean
     private static Emaitza Eska_Baieztatu(ErabiltzaileSaioa saioa, JsonElement d)
     {
@@ -793,7 +965,7 @@ public static class EragiketaKudeatzailea
         });
     }
 
-    private static Emaitza Eska_Txartela(JsonElement d)
+    private static Emaitza Eska_Txartela(ErabiltzaileSaioa saioa, JsonElement d)
     {
         var eskaeraId = Zenbakia(d, "eskaeraId");
         if (eskaeraId <= 0) return Emaitza.Txar("Eskaeraren IDa falta da");
@@ -803,12 +975,15 @@ public static class EragiketaKudeatzailea
         string? bezeroa = null; string data = ""; string egoera = ""; double guztira = 0;
         using (var c = konexioa.CreateCommand())
         {
-            c.CommandText = @"SELECT u.nombre, p.fechaHora, p.estado, p.total
+            c.CommandText = @"SELECT u.nombre, p.fechaHora, p.estado, p.total, p.idUsuario
                                 FROM Pedido p JOIN Usuario u ON u.id = p.idUsuario
                                WHERE p.id = @p";
             c.Parameters.AddWithValue("@p", eskaeraId);
             using var r = c.ExecuteReader();
             if (!r.Read()) return Emaitza.Txar("Ez da eskaera aurkitu");
+            // Eskaera irekiak (eta tiketak) sortzaileak edo admin-ek soilik ikus ditzakete
+            if (saioa.Rola != "admin" && r.GetInt64(4) != saioa.ErabiltzaileId)
+                return Emaitza.Txar("Eskaera hori ez da zurea");
             bezeroa = r.GetString(0); data = r.GetString(1);
             egoera = r.GetString(2); guztira = r.GetDouble(3);
         }

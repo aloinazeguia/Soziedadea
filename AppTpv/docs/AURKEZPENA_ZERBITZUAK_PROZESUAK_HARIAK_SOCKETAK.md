@@ -85,7 +85,7 @@ flowchart TB
 | Entzuketa | `Sarea/TCPZerbitzaria.cs` | Socket-a ireki, 10 bezero onartu, hari bat sortu bakoitzerako |
 | Protokoloa | `Sarea/BezeroKonexioa.cs` | Lerroa irakurri, JSON parsedu, `ekintza` eta `token` atera, erantzuna idatzi |
 | Saioak | `Zerbitzuak/Saioak.cs` | Token GUID → erabiltzailea/rola; `ConcurrentDictionary` |
-| Negozioa | `Zerbitzuak/EragiketaKudeatzailea.cs` | 20 ekintza, `AdminEskatzenDu` / `SaioaEskatzenDu`, transakzioak |
+| Negozioa | `Zerbitzuak/EragiketaKudeatzailea.cs` | 22 ekintza + `LOGOUT`, `AdminEskatzenDu` / `SaioaEskatzenDu`, transakzioak, eskaeren jabetza-guardak |
 | Datuak | `Datuak/DatuBasea.cs` | SQLite konexioa, eskema, haziak, `IdazketaBlokeoa` |
 | Segurtasuna | `Datuak/Segurtasuna.cs` | SHA-256 + gatz finkoa |
 | Garraioa (bezeroa) | `Zerbitzuak/Konexioa.cs` | `TcpClient`, bidali/jaso, konexioa berriro ireki |
@@ -211,6 +211,20 @@ badira, 11.ari honako hau bidali eta socket-a berehala itxi egiten zaio:
 deitu eta `Ezin izan da zerbitzariarekin konektatu. Egiaztatu konexioa eta saiatu berriro.` mezua itzultzen du.
 Hurrengo eskaeran `KonexioaBermatu()` berriro konektatzen saiatzen da.
 
+Zerbitzariaren aldean, `BezeroKonexioa.Artatu()`-k `try/finally` blokea du:
+socket-a ixten denean (prozesua kraskatu edo konexioa galdu arren) konexio
+horretan sortutako tokenak `Saioak.Itxi()` bidez ezabatzen dira. Horrela ez dira
+saio zaharrak pilatzen saioa ireki/itxi errepikatzean. `LOGOUT` esplizitua
+badago, tokena berehala kentzen da.
+
+### Saioz aldatuta eskaera berreskuratzea
+
+Osagaiak zerbitzariaren SQLite datu-basean gordetzen dira (`LineaPedido`),
+bezeroaren memorian ez. Horregatik, socket-a itxi eta beste konexio batekin
+LOGIN egin arren, `PEDIDO_REKUPERATU` ekintzak eskaera irekia eta haren
+lerroak itzultzen ditu, bezeroak UI-egoera berreraiki dezan. Jabetza
+egiaztatzen da: sortzaileak edo admin-ek soilik ikus ditzakete.
+
 ---
 
 ## 6. Eskaera baten bizitza (adibidea: erreserba sortzea)
@@ -281,7 +295,10 @@ sequenceDiagram
 | Zergatik hari bat bezero bakoitzeko? | `ReadLine` blokeatzen delako; bestela bezero geldo batek gainerakoak itxararaziko lituzke. |
 | Zer da IP:ataka bikotea? | Socket baten helbidea. Zerbitzaria `0.0.0.0:5001`-en dago; bezeroak ostalariaren IPa erabiltzen du VM-an. |
 | Nola saihesten da interfazearen blokeoa? | Zerbitzarian hari independente batekin; bezeroan deiak laburrak dira eta botoiak desgaitu egiten dira bikoizketak ekiditeko. |
-| Nola amaitzen da konexioa? | `LOGOUT` mezua (saioa mapatik kentzen du), `App_Exit`, edo errorea gertuz gero `Itxi()`. |
+| Nola amaitzen da konexioa? | `LOGOUT` mezua (saioa mapatik kentzen du), `App_Exit`, edo errorea gertuz gero `Itxi()`. Socket-a ixten denean `finally` blokeak ere tokenak garbitzen ditu. |
+| Zer gertatzen da saioa itxi/ireki ondoren eskaerarekin? | Osagaiak BDn daude gordeta; `PEDIDO_REKUPERATU`-k eskaera irekia eta lerroak berreskuratzen ditu, gailuz aldatuta ere. |
+| Beste erabiltzaile batek ikus al ditzake nire osagaiak? | Ez. Zerbitzariak jabetza egiaztatzen du: `Eskaera hori ez da zurea`. Admin-ek soilik du salbuespena. |
+| Nola erakusten da mahien egoera? | `MahaiMapaIkuspegia` fitxak `MESAS_LISTA` erabiltzen du: 7 mahai, `librea`/`erreserbatuta`/`okupatuta` + eskaera zenbakia. Eskaera kobratzean mahia libre bihurtzen da. |
 
 ---
 
@@ -289,14 +306,18 @@ sequenceDiagram
 
 | Kontzeptua | Fitxategia / lerroak |
 |---|---|
-| DB hasieratu + hari nagusiaren hasiera | `ZerbitzariaTPV/Programa.cs` 11–19 |
+| DB hasieratu + hari nagusiaren hasiera | `ZerbitzariaTPV/Programa.cs` 11–15 |
 | Ataka eta 10 bezeroen konstanteak | `ZerbitzariaTPV/Sarea/TCPZerbitzaria.cs` 15–16 |
-| `AcceptTcpClient` + `Interlocked` + `SESSION_LIMIT` | `ZerbitzariaTPV/Sarea/TCPZerbitzaria.cs` 32–45 |
-| Bezero bakoitzeko harixa | `ZerbitzariaTPV/Sarea/TCPZerbitzaria.cs` 49–59 |
-| Socket-a, `ReadLine`/`WriteLine`, JSON parse | `ZerbitzariaTPV/Sarea/BezeroKonexioa.cs` 18–60 |
-| `LOGOUT` zuzenean kudeatuta | `ZerbitzariaTPV/Sarea/BezeroKonexioa.cs` 52–56 |
-| Saioen mapa konkurrentea | `ZerbitzariaTPV/Zerbitzuak/Saioak.cs` 17–34 |
-| Rol guardak | `ZerbitzariaTPV/Zerbitzuak/EragiketaKudeatzailea.cs` 78–89 |
-| Idazketa-lock bakarra | `ZerbitzariaTPV/Datuak/DatuBasea.cs` 22, `EragiketaKudeatzailea.cs` 855–863 |
-| Bezeroaren socket-a + timeout + lock | `BezeroaWPF/Zerbitzuak/Konexioa.cs` 37, 59–124 |
-| UI-haria / saioa ixtea | `BezeroaWPF/App.xaml.cs` 13–25 |
+| `AcceptTcpClient` + `Interlocked` + `SESSION_LIMIT` | `ZerbitzariaTPV/Sarea/TCPZerbitzaria.cs` 41–55 |
+| Bezero bakoitzeko harixa | `ZerbitzariaTPV/Sarea/TCPZerbitzaria.cs` 59–85 |
+| Socket-a, `ReadLine`/`WriteLine`, JSON parse | `ZerbitzariaTPV/Sarea/BezeroKonexioa.cs` 25–110 |
+| `LOGOUT` + `finally`-bidezko token-garbiketa | `ZerbitzariaTPV/Sarea/BezeroKonexioa.cs` 55–63, 86–90, 101–110 |
+| Saioen mapa konkurrentea | `ZerbitzariaTPV/Zerbitzuak/Saioak.cs` 28 |
+| Rol guardak + jabetza-guardak | `ZerbitzariaTPV/Zerbitzuak/EragiketaKudeatzailea.cs` 78–89 |
+| Eskaera berreskuratu / mahia esleitu | `EragiketaKudeatzailea.cs` 704, 782 |
+| Idazketa-lock bakarra | `ZerbitzariaTPV/Datuak/DatuBasea.cs` 22, `EragiketaKudeatzailea.cs` 1030 |
+| `Pedido.idMesa` migrazioa | `ZerbitzariaTPV/Datuak/DatuBasea.cs` 39–58 |
+| Bezeroaren socket-a + timeout + lock | `BezeroaWPF/Zerbitzuak/Konexioa.cs` 53, 90 |
+| Saioa irekitzean osagaiak berreskuratu | `BezeroaWPF/Ikuspegiak/KontsumizioIkuspegia.xaml.cs` (`EskaeraBerreskuratu`) |
+| Mahaien mapa | `BezeroaWPF/Ikuspegiak/MahaiMapaIkuspegia.xaml(.cs)` |
+| UI-haria / saioa ixtea | `BezeroaWPF/App.xaml.cs` 19–25 |

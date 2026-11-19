@@ -90,11 +90,13 @@ CREATE TABLE IF NOT EXISTS Producto (
 CREATE TABLE IF NOT EXISTS Pedido (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     idUsuario    INTEGER NOT NULL,
+    idMesa       INTEGER,                        -- mahaiari lotutako eskaera (NULL = mahairik gabe)
     fechaHora    TEXT    NOT NULL,               -- "YYYY-MM-DD HH:mm:ss"
     estado       TEXT    NOT NULL DEFAULT 'abierta'
                          CHECK (estado IN ('abierta', 'cobrada', 'anulada')),
     total        REAL    NOT NULL DEFAULT 0,
-    FOREIGN KEY (idUsuario) REFERENCES Usuario(id)
+    FOREIGN KEY (idUsuario) REFERENCES Usuario(id),
+    FOREIGN KEY (idMesa)   REFERENCES Mesa(id)
 );
 
 CREATE TABLE IF NOT EXISTS LineaPedido (
@@ -108,3 +110,4 @@ CREATE TABLE IF NOT EXISTS LineaPedido (
 );
 
 CREATE INDEX IF NOT EXISTS idx_linea_pedido ON LineaPedido(idPedido);
+CREATE INDEX IF NOT EXISTS idx_pedido_mesa ON Pedido(idMesa, estado);

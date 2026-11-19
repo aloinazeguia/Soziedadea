@@ -14,11 +14,18 @@ public class BezeroKonexioa
     // TCP konexioa gordetzen du, bezeroaren socketa adierazten duena.
     private readonly TcpClient _bezeroa;
 
+    // Konexio honetan sortu diren saio-tokenak. Socket-a bat-batean ixten bada
+    // (prozesua kraskatu, konexioa galdu...) tokenak zerbitzarian pilatu ez daitezen
+    // erabiltzen dira: Artatu()-ren finally blokean guztiak ezabatzen dira.
+    private readonly HashSet<string> _saioTokenak = new();
+
     // Konexio objektua sortzean socketa jasotzen da.
     public BezeroKonexioa(TcpClient bezeroa) { _bezeroa = bezeroa; }
 
     public void Artatu()
     {
+        try
+        {
         // Socketa eta streamak automatikoki itxi daitezke erabilitako 'using' bidez.
         using (_bezeroa)
         using (var fluxua = _bezeroa.GetStream())
@@ -44,6 +51,17 @@ public class BezeroKonexioa
                 idazlea.Write("\n");
             }
         }
+        }
+        finally
+        {
+            // Socket-a ixten denean saioak garbitu, LOGOUT esplizitua ez badago ere.
+            // Horrela erabiltzaile askok saioa ireki/itxi errepikatzean ez dira
+            // token zaharrak zerbitzarian geratzen.
+            foreach (var token in _saioTokenak) Saioak.Itxi(token);
+            if (_saioTokenak.Count > 0)
+                Console.WriteLine($"[SESION] Konexioa itxita: {_saioTokenak.Count} token garbituta");
+            _saioTokenak.Clear();
+        }
     }
 
     private string Prozesatu(string lerroa)
@@ -68,12 +86,31 @@ public class BezeroKonexioa
             if (ekintza == "LOGOUT")
             {
                 Saioak.Itxi(token);
+                if (token != null) _saioTokenak.Remove(token);
                 return Serializatu(Emaitza.Ondo(new { mezua = "Saioa itxi da" }));
             }
 
             // Beste egoeretan, tokena validatu eta operazioa exekutatu.
             var saioa = Saioak.Lortu(token);
+            if (saioa != null && token != null)
+                _saioTokenak.Add(token);
+
             var emaitza = EragiketaKudeatzailea.Exekutatu(saioa, ekintza, datuak);
+
+            // LOGINek sortutako tokena ere gorde: bezeroa berehala itxiz gero
+            // Artatu()-ren finally blokeak ezabatu dezan.
+            if (ekintza == "LOGIN" && emaitza.Arrakasta && emaitza.Datuak != null)
+            {
+                var json = JsonSerializer.Serialize(emaitza.Datuak);
+                using var doc = JsonDocument.Parse(json);
+                if (doc.RootElement.TryGetProperty("token", out var tv) &&
+                    tv.ValueKind == JsonValueKind.String)
+                {
+                    var sortutakoa = tv.GetString();
+                    if (sortutakoa != null) _saioTokenak.Add(sortutakoa);
+                }
+            }
+
             return Serializatu(emaitza);
         }
         catch (JsonException)

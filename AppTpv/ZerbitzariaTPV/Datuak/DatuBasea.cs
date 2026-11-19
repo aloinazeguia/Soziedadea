@@ -36,6 +36,30 @@ public static class DatuBasea
         using var konexioa = Konektatu();
         konexioa.Open();
 
+        // MIGRAZIOA: lehendik dauden datu-baseetan Pedido.idMesa zutabea gehitu.
+        // Zutabea NULL onargarria denez, ez da daturik galtzen; eskema berrian
+        // jada dagoenez, hor ez da ezer aldatzen.
+        using (var migrazioa = konexioa.CreateCommand())
+        {
+            migrazioa.CommandText =
+                "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'Pedido'";
+            var taulaBadago = Convert.ToInt32(migrazioa.ExecuteScalar()) > 0;
+
+            if (taulaBadago)
+            {
+                migrazioa.CommandText =
+                    "SELECT COUNT(*) FROM pragma_table_info('Pedido') WHERE name = 'idMesa'";
+                var zutabeaBadago = Convert.ToInt32(migrazioa.ExecuteScalar()) > 0;
+                if (!zutabeaBadago)
+                {
+                    migrazioa.CommandText =
+                        "ALTER TABLE Pedido ADD COLUMN idMesa INTEGER REFERENCES Mesa(id)";
+                    migrazioa.ExecuteNonQuery();
+                    Console.WriteLine("[BD] Migrazioa: Pedido.idMesa gehitu da");
+                }
+            }
+        }
+
         // Eskema exekutatzen da (idempotentea: dena IF NOT EXISTS)
         var esquema = File.ReadAllText(
             Path.Combine(AppContext.BaseDirectory, "Datuak", "Eskema.sql"));
@@ -100,13 +124,17 @@ public static class DatuBasea
             }
         }
 
-        // Mahai adibideak
+        // 7 mahai: 4 laguneko 2, 6 laguneko 2 eta 10 laguneko 3
         using (var agindua = konexioa.CreateCommand())
         {
             agindua.CommandText = @"
                 INSERT OR IGNORE INTO Mesa (numMesa, capacidad) VALUES (1, 4);
                 INSERT OR IGNORE INTO Mesa (numMesa, capacidad) VALUES (2, 4);
-                INSERT OR IGNORE INTO Mesa (numMesa, capacidad) VALUES (3, 6);";
+                INSERT OR IGNORE INTO Mesa (numMesa, capacidad) VALUES (3, 6);
+                INSERT OR IGNORE INTO Mesa (numMesa, capacidad) VALUES (4, 6);
+                INSERT OR IGNORE INTO Mesa (numMesa, capacidad) VALUES (5, 10);
+                INSERT OR IGNORE INTO Mesa (numMesa, capacidad) VALUES (6, 10);
+                INSERT OR IGNORE INTO Mesa (numMesa, capacidad) VALUES (7, 10);";
             agindua.ExecuteNonQuery();
         }
 

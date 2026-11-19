@@ -1,9 +1,10 @@
 <!-- ============================================================
-  AppTpv — Ventana nagusia: aloja las interfaces 2 a 5
-    2. Kontsumizioak (comandero del TPV, todo usuario)
-    3. Erreserbak (todo usuario)
-    4. Administracion de erabiltzaileak (solo admin)
-    5. Administracion de izakinak/carta (solo admin)
+  AppTpv — Leiho nagusia: 6 fitxa
+    1. Kontsumizioak (komanderoa, erabiltzaile guztiek)
+    2. Erreserbak (erabiltzaile guztiek)
+    3. Mahaiak (mapa: librea / erreserbatuta / okupatuta)
+    4. Erabiltzaileen administrazioa (admin soilik)
+    5. Izakinen/cartaren administrazioa (admin soilik)
 ============================================================ -->
 <Window x:Class="BezeroaWPF.Leihoak.LeihoNagusia"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -28,6 +29,9 @@
             </TabItem>
             <TabItem Header="Erreserbak" Tag="Erreserbak">
                 <vistas:ErreserbaIkuspegia/>
+            </TabItem>
+            <TabItem Header="Mahaiak" Tag="Mahaiak">
+                <vistas:MahaiMapaIkuspegia/>
             </TabItem>
             <TabItem Header="Erabiltzaileak" Tag="Erabiltzaileak">
                 <vistas:ErabiltzaileIkuspegia/>

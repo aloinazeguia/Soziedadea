@@ -10,7 +10,7 @@ Bezeroaren interfazeak WPF/XAML-ekin daude eginda (`BezeroaWPF` proiektua).
 |---|---|
 | `AppTpv.slnx` | Soluzioa: bi proiektu |
 | `ZerbitzariaTPV/` | Zerbitzaria: TCP, saioak, negozio-logika, SQLite |
-| `BezeroaWPF/` | Bezeroa: 5 interfazeak XAML-en (`Leihoak/`, `Ikuspegiak/`) |
+| `BezeroaWPF/` | Bezeroa: 6 interfazeak XAML-en, mahaien mapa barne (`Leihoak/`, `Ikuspegiak/`) |
 | `docs/PROTOCOLO.md` | TCP protokoloa (gako euskaldunak) |
 | `docs/PLAN.md` | Garapen-plana eta proben frogak |
 | `docs/GIDA_TEKNIKOA.md` | **Gida teknikoa** |
@@ -36,7 +36,7 @@ dotnet run --project ZerbitzariaTPV/ZerbitzariaTPV.csproj
 Kontsolan honelako mezuak ikusi behar dira:
 
 ```
-BD OK -> erabiltzaileak=17 mahaiak=3 produktuak=21
+BD OK -> erabiltzaileak=17 mahaiak=7 produktuak=21
 [TCP] 5001 atakan entzuten (gehienez 10 bezero)
 Zerbitzaria martxan. Idatzi 'parar' ixteko.
 ```
@@ -87,8 +87,11 @@ pestaña batzuk ikusgai egongo dira.
   - Debug: `ZerbitzariaTPV/bin/Debug/net10.0/data/tpv.db`
   - Release: `ZerbitzariaTPV/bin/Release/net10.0/data/tpv.db`
 - Lehen abiaraztean `ZerbitzariaTPV/Datuak/Eskema.sql`-etik sortzen da automatikoki.
+- Lehendik dauden DBetan `Pedido.idMesa` zutabea migrazio idempotente bidez gehitzen
+  da (`DatuBasea.Hasieratu()`), datuak galdu gabe. Zutabe horri esker eskaera irekia
+  mahai bati lotzen zaio eta mapak egoera erakusten du.
 - Hasierako datuak: 17 erabiltzaile (`admin` + 15 erabiltzaile berri, pasahitza
-  `1234`), 3 mahai (4/4/6 plaza) eta 21 produktu (kafeak, freskagarriak,
+  `1234`), 7 mahai (4 laguneko 2, 6 laguneko 2, 10 laguneko 3) eta 21 produktu (kafeak, freskagarriak,
   garagardoa eta ardoak; lehendik zeuden 4 produktuak ere mantendu dira).
 - SQLite fitxategiak ez du berezko erabiltzaile/pasahitzik; sarbidea aplikazioak
   kontrolatzen du. Pasahitzak **SHA-256 + gatz finkoa** (`AppTpv::ErronkaWIDZPP::2026`)
@@ -106,11 +109,13 @@ martxan badago, erabili SQLite-ren backup mekanismoa (WAL modua dago aktibatuta)
 | 1.3 Stockaren CRUD | `BezeroaWPF/Ikuspegiak/IzakinIkuspegia.xaml` |
 | 1.4 Interfaze nagusia | `BezeroaWPF/Ikuspegiak/KontsumizioIkuspegia.xaml` |
 | 1.5 Mahai-erreserbak (bazkaria/afaria) | `BezeroaWPF/Ikuspegiak/ErreserbaIkuspegia.xaml` |
+| Mahaien mapa (7 mahai, egoerarekin) | `BezeroaWPF/Ikuspegiak/MahaiMapaIkuspegia.xaml` |
+| Eskaera irekiaren berreskuratzea (saioa itxi/ireki, gailuz aldatuta ere) | `PEDIDO_REKUPERATU` + `KontsumizioIkuspegia.Loaded` |
 | 2. Rolak (admin / erabiltzailea) | `ZerbitzariaTPV/Zerbitzuak/EragiketaKudeatzailea.cs` |
 | 3. TCP, 10 bezero, hari bana | `ZerbitzariaTPV/Sarea/TCPZerbitzaria.cs` |
-| 3. Idazketen lock bakarra | `ZerbitzariaTPV/Datuak/DatuBasea.cs` (`LockEscritura`) |
+| 3. Idazketen lock bakarra | `ZerbitzariaTPV/Datuak/DatuBasea.cs` (`IdazketaBlokeoa`) |
 | 4. Ikus Osagaiak erreserba/kontsumoetan | XAML-eko `ComboBox`, `ListBox`, `DataGrid`, txartel-botoiak |
-| 4. Ticketa + stock eguneratzea | `KontsumizioIkuspegia.xaml.cs` + `Ped_Confirmar` |
+| 4. Ticketa + stock eguneratzea | `KontsumizioIkuspegia.xaml.cs` + `Eska_Baieztatu` |
 
 ## Dokumentazio gehiago
 

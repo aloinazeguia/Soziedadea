@@ -25,8 +25,18 @@ public class MahaiDatuak
     [JsonPropertyName("id")] public int Id { get; set; }
     [JsonPropertyName("mahaiZenbakia")] public int MahaiZenbakia { get; set; }
     [JsonPropertyName("edukiera")] public int Edukiera { get; set; }
+    [JsonPropertyName("erreserbak")] public int Erreserbak { get; set; }
+    [JsonPropertyName("eskaeraId")] public int? EskaeraId { get; set; }
+    [JsonPropertyName("egoera")] public string Egoera { get; set; } = "librea";
 
-    public string Deskribapena => $"Mahaia {MahaiZenbakia} (edukiera: {Edukiera})";
+    public string Deskribapena => $"{MahaiZenbakia}. mahaia · {Edukiera} plaza · {EgoeraErakutsi}";
+    public string EgoeraErakutsi => Egoera switch
+    {
+        "okupatuta" => "Okupatuta",
+        "erreserbatuta" => "Erreserbatuta",
+        _ => "Librea"
+    };
+    public string EskaeraErakutsi => EskaeraId.HasValue ? $"Eskaera zk. {EskaeraId}" : "";
 }
 
 public class ErreserbaDatuak
@@ -57,11 +67,24 @@ public class ErabiltzaileDatuak
 
 public class EskaeraLerroDatuak
 {
+    [JsonPropertyName("produktuId")] public int ProduktuId { get; set; }
     [JsonPropertyName("izena")] public string Izena { get; set; } = "";
     [JsonPropertyName("kopurua")] public int Kopurua { get; set; }
     [JsonPropertyName("prezioUnitarioa")] public double PrezioUnitarioa { get; set; }
 
     public double Zenbatekoa => Math.Round(Kopurua * PrezioUnitarioa, 2);
+}
+
+/// <summary>
+/// PEDIDO_REKUPERATU erantzuna: saioa itxi/ireki ondoren DBn gordetako
+/// eskaera irekia eta haren osagai-zerrenda berreskuratzeko erabiltzen da.
+/// </summary>
+public class EskaeraBerreskuratzea
+{
+    [JsonPropertyName("eskaeraId")] public int EskaeraId { get; set; }
+    [JsonPropertyName("mahaiId")] public int? MahaiId { get; set; }
+    [JsonPropertyName("mahaiZenbakia")] public int? MahaiZenbakia { get; set; }
+    [JsonPropertyName("lerroak")] public List<EskaeraLerroDatuak> Lerroak { get; set; } = new();
 }
 
 /// <summary>

@@ -37,14 +37,14 @@ Hizkuntzen (EU/ES) aldaketarako plana: [hizkuntzak](hizkuntzak.md).
 | `ZerbitzariaTPV/Zerbitzuak/EragiketaKudeatzailea.cs` | Ekintza guztien logika + rol guardak |
 | `ZerbitzariaTPV/Zerbitzuak/Saioak.cs` | Tokenen mapa konkurrentea |
 | `ZerbitzariaTPV/Zerbitzuak/Emaitza.cs` | `{ arrakasta, datuak, errorea }` emaitza |
-| `ZerbitzariaTPV/Datuak/DatuBasea.cs` | Konexioa, eskema, haziak, `IdazketaBlokeoa` |
-| `ZerbitzariaTPV/Datuak/Eskema.sql` | Taulak, indizeak, WAL |
+| `ZerbitzariaTPV/Datuak/DatuBasea.cs` | Konexioa, eskema, haziak, `Pedido.idMesa` migrazioa, `IdazketaBlokeoa` |
+| `ZerbitzariaTPV/Datuak/Eskema.sql` | Taulak, indizeak (`idx_pedido_mesa`), WAL |
 | `ZerbitzariaTPV/Datuak/Segurtasuna.cs` | SHA-256 + gatz finkoa |
 | `BezeroaWPF/Zerbitzuak/Konexioa.cs` | Bezeroaren TCP konexioa |
 | `BezeroaWPF/Zerbitzuak/Saioa.cs` | Token/rol lokala |
 | `BezeroaWPF/Zerbitzuak/Ereduak.cs` | JSON → objektuen mapaketa |
 | `BezeroaWPF/Leihoak/*.xaml` | Login, nagusia, kantitate leihoa |
-| `BezeroaWPF/Ikuspegiak/*.xaml` | 4 erabiltzaile-kontrol (ikus 5. atala) |
+| `BezeroaWPF/Ikuspegiak/*.xaml` | 6 erabiltzaile-kontrol, mahaien mapa barne (ikus 5. atala) |
 
 ## 3. Datu-basea (SQLite)
 
@@ -58,14 +58,24 @@ eta, fitxategia berria bada, haziak txertatzen ditu.
 | `Mesa` | Erreserbetarako mahaiak | `numMesa`, `capacidad` |
 | `Reserva` | Erreserbak | `idMesa`, `fecha` (NULL = gabe), `turno` (`bazkaria`/`afaria`), `numComensales`, `idUsuario`, `estado` (`activa`/`cancelada`) |
 | `Producto` | Carta + biltegia | `nombre`, `precio`, `stock`, `ingredientes` (osagaiak), `categoria`, `activo` |
-| `Pedido` | Komandaren burua | `idUsuario`, `fechaHora`, `estado` (`abierta`/`cobrada`/`anulada`), `total` |
+| `Pedido` | Komandaren burua | `idUsuario`, `idMesa` (NULL = mahairik gabe), `fechaHora`, `estado` (`abierta`/`cobrada`/`anulada`), `total` |
 | `LineaPedido` | Komandaren lerroak | `idPedido`, `idProducto`, `cantidad`, `precioUnitario` (historikoa) |
 
 - `PRAGMA foreign_keys = ON` eta `PRAGMA journal_mode = WAL` (irakurketak
   paraleloan, idazketak serializatuta).
 - **Ezabaketa logikoa:** `Usuario.activo = 0`, `Producto.activo = 0`,
   `Reserva.estado = 'cancelada'`. Horrela ticketen historia ez da apurtzen.
-- Indizeak: `(fecha, turno)`, `(idMesa, fecha)`, `(idPedido)`.
+- Indizeak: `(fecha, turno)`, `(idMesa, fecha)`, `(idPedido)`, `(idMesa, estado)`.
+
+`DatuBasea.Hasieratu()`-ek **migrazio idempotentea** exekutatzen du eskema baino
+lehen: lehendik dauden DBetan `Pedido.idMesa` zutabea gehitzen du
+(`ALTER TABLE ... ADD COLUMN`, NULL onargarria → ez da daturik galtzen).
+`Eskema.sql`-en zutabea eta `idx_pedido_mesa` indizea jada daude DB berrietan.
+
+**Eskaeren iraunkortasuna:** `PEDIDO_AGREGAR_LINEA`-k `LineaPedido` erregistroak
+idazten ditu komandan; bezeroak `PEDIDO_REKUPERATU` erabiltzen du saioa irekitzean
+DBtik berreskuratzeko. Hori dela eta, saioa itxi/ireki arren —gailu berean nahiz
+bestean— ordaindu gabeko eskaeraren osagai-zerrenda agertzen da berriro.
 
 ### Haziak (lehen abiaraztea)
 
@@ -75,7 +85,7 @@ eta, fitxategia berria bada, haziak txertatzen ditu.
   `maddi.oiartzabal`, `gorka.larralde`, `uxue.mendoza`, `asier.bengoa`,
   `leire.sarobe`, `eneko.iturbe`, `amets.salazar`, `ihintza.barandiaran`,
   `hodei.mintegi`, `eider.zabaleta`, `unai.berasategi`.
-- Mahaiak: 1 (4 plaza), 2 (4), 3 (6).
+- Mahaiak: 1–2 (4 plaza), 3–4 (6 plaza), 5–7 (10 plaza) — **7 mahai** guztira.
 - Produktuak: Kola kontxa (2,50 € / 24), Kalimotxo (3,00 € / 40),
   Prentxikoa (3,00 € / 12), Sakramento burger (6,50 € / 8).
 - Carta (17 edari, bakoitzeko 20 unitate):
@@ -116,35 +126,48 @@ baimena egiaztatzen du `AdminEskatzenDu` / `SaioaEskatzenDu` guardekin.
 | `PRODUCTO_AGREGAR` / `_MODIFICAR` / `_BORRAR` | admin | `IzakinIkuspegia` |
 | `STOCK_MODIFICAR` | admin | `IzakinIkuspegia.BtnIzakinak_Click` |
 | `USUARIOS_LISTA` / `USUARIO_CREAR` / `_MODIFICAR` / `_BORRAR` | admin | `ErabiltzaileIkuspegia` |
-| `MESAS_LISTA` | saioa | `ErreserbaIkuspegia.MahaiakKargatu` |
+| `MESAS_LISTA` | saioa | `ErreserbaIkuspegia`, `KontsumizioIkuspegia`, `MahaiMapaIkuspegia` |
 | `RESERVA_CREAR` / `_MODIFICAR` / `_BORRAR` / `_LISTA` | saioa | `ErreserbaIkuspegia` |
 | `PEDIDO_ABRIR` | saioa | `KontsumizioIkuspegia.EskaeraIrekiaBermatu` |
-| `PEDIDO_AGREGAR_LINEA` | saioa | `KontsumizioIkuspegia.BtnBidali_Click` |
-| `PEDIDO_CONFIRMAR` | saioa | `KontsumizioIkuspegia.BtnKobratu_Click` |
-| `TICKET_OBTENER` | saioa | `KontsumizioIkuspegia` (AZPITOTALA / IKUSI TIKETA) |
+| `PEDIDO_AGREGAR_LINEA` | saioa (jabea/admin) | `KontsumizioIkuspegia.BtnBidali_Click` |
+| `PEDIDO_REKUPERATU` | saioa (jabea/admin) | `KontsumizioIkuspegia.EskaeraBerreskuratu` (Loaded) |
+| `PEDIDO_MAHAIA_ESLEITU` | saioa (jabea/admin) | `KontsumizioIkuspegia.BtnMahiaEsleitu_Click` |
+| `PEDIDO_CONFIRMAR` | saioa (jabea/admin) | `KontsumizioIkuspegia.BtnKobratu_Click` |
+| `PEDIDO_CANCELAR` | saioa (jabea/admin) | `KontsumizioIkuspegia` |
+| `TICKET_OBTENER` | saioa (jabea/admin) | `KontsumizioIkuspegia` (AZPITOTALA / IKUSI TIKETA) |
 
-`LOGOUT` ez dago `EragiketaKudeatzailea`-en: `BezeroKonexioa.cs`-ek kudeatzen du
-zuzenean, tokena saioen mapatik kentzeko.
+Guztira **22 ekintza + `LOGOUT`**. `LOGOUT` ez dago `EragiketaKudeatzailea`-en:
+`BezeroKonexioa.cs`-ek kudeatzen du zuzenean, tokena saioen mapatik kentzeko.
+
+`BezeroKonexioa.Artatu()`-ren `try/finally` blokeak socket-a ixten denean
+konexio horretan sortutako token guztiak ezabatzen ditu, LOGOUT esplizitua ez badago
+ere (`[SESION] Konexioa itxita: N token garbituta`). 10 bezeroen muga aldatu gabe dago.
 
 Xehetasunak: [PROTOCOLO.md](PROTOCOLO.md).
 
 ## 5. Interfazeen mapa (XAML)
 
-Erronkak 5 interfaze eskatzen ditu; horiek dira, zehazki, zure XAML fitxategiak:
+Erronkak 5 interfaze eskatzen ditu; horiei **mahaien mapa** (6. fitxa) gehitu zaie:
 
 | # | Interfazea | XAML | Kontrol nagusiak |
 |---|---|---|---|
 | 1 | Login | `Leihoak/SaioHasieraLeihoa.xaml` | `TxtErabiltzailea`, `TxtPasahitza`, `BtnSartu`, `TxtErrorea` |
 | 2 | Erabiltzaileen kudeaketa | `Ikuspegiak/ErabiltzaileIkuspegia.xaml` | `TxtErabiltzailea`, `TxtPasahitza`, `TxtIzena`, `CboRola`, `GridErabiltzaileak` |
 | 3 | Biltegiaren kudeaketa | `Ikuspegiak/IzakinIkuspegia.xaml` | `TxtIzena`, `TxtPrezioa`, `TxtIzakinak`, `TxtOsagaiak`, `TxtKategoria`, `GridProduktuak`, `TxtIzakinBerriak` |
-| 4 | Interfaze nagusia | `Ikuspegiak/KontsumizioIkuspegia.xaml` | `ListaKategoriak`, `ListaProduktuak`, `ListaEskaera`, `BtnBidali`, `BtnAzpitotala`, `BtnKobratu`, `BtnTxartela` |
+| 4 | Interfaze nagusia | `Ikuspegiak/KontsumizioIkuspegia.xaml` | `ListaKategoriak`, `ListaProduktuak`, `ListaEskaera`, `CboMahaiak`, `BtnMahiaEsleitu`, `BtnBidali`, `BtnAzpitotala`, `BtnKobratu`, `BtnTxartela` |
 | 5 | Erreserbak | `Ikuspegiak/ErreserbaIkuspegia.xaml` | `CboMahia`, `CboTxanda`, `TxtData`, `TxtPertsonak`, `GridErreserbak` |
+| 6 | Mahaien mapa | `Ikuspegiak/MahaiMapaIkuspegia.xaml` | `ListaMahaiak`, `BtnFreskatu`, `TxtMapaInfo` — 7 mahai, egoera bisualarekin |
+
+`KontsumizioIkuspegia.Loaded`-ek `MenuaKargatu()`, `MahaiakKargatu()` eta
+`EskaeraBerreskuratu()` deitzen ditu: saioa irekitzean DBn gordetako eskaera irekia
+eta haren osagaiak berreraikitzen dira.
 
 Osagarriak:
 
-- `Leihoak/LeihoNagusia.xaml` — 4 kontrolak ostatatzen dituen `TabControl`;
+- `Leihoak/LeihoNagusia.xaml` — 5 fitxa dituen `TabControl`
+  (Kontsumizioak, Erreserbak, **Mahaiak**, Erabiltzaileak, Izakinak);
   `Saioa.AdminDa` false denean **Erabiltzaileak** eta **Izakinak** pestañak
-  `Visibility.Collapsed` bihurtzen dira.
+  `Visibility.Collapsed` bihurtzen dira. Mahaien mapa erabiltzaile guztientzat ikusgai dago.
 - `Leihoak/KopuruLeihoa.xaml` — kantitatea eskatzeko leiho laguntzailea.
   Gaur egun `KontsumizioIkuspegia`-ek lerroaren inline editorea erabiltzen du;
   leiho hau ez dago askotan deituta (eskuragarri dago, erabiltzeko prest).
@@ -159,6 +182,13 @@ Osagarriak:
 - Rol guardak zerbitzarian daude, bezeroan ez: bezeroak pestañak ezkutatzea
   erosotasuna baino ez da; zerbitzariak benetan ukatzen du baimenik gabeko
   ekintza (`Ekintza hau administratzaileentzat bakarrik dago baimenduta`).
+- Eskaera irekien **jabetza-guardak**: `PEDIDO_REKUPERATU`,
+  `PEDIDO_AGREGAR_LINEA`, `PEDIDO_CONFIRMAR`, `PEDIDO_CANCELAR`,
+  `PEDIDO_MAHAIA_ESLEITU` eta `TICKET_OBTENER` ekintzetan sortzailea edo admin
+  soilik aritu daiteke. Bestela: `Eskaera hori ez da zurea`.
+- Tokenen garbiketa: `LOGOUT` esplizitua ez badago ere, socket-a ixten denean
+  `BezeroKonexioa.Artatu()`-ren `finally` blokeak konexio horretako tokenak
+  ezabatzen ditu, saio zaharrak pilatu ez daitezen.
 
 ## 7. Konkurrentzia
 
@@ -174,8 +204,8 @@ lock (DatuBasea.IdazketaBlokeoa)   // ZerbitzariaTPV/Datuak/DatuBasea.cs
 
 - Bi erabiltzailek aldi berean taula berean idazten saiatuz gero, bigarrena
   lehena amaitu arte itxaron egiten da.
-- `Erres_Sortu`, `Eska_LerroGehitu` eta `Eska_Baieztatu`-ek transakzioak
-  erabiltzen dituzte (rollback egiten dute baliozkotzeak huts eginez gero).
+- `Erres_Sortu`, `Eska_LerroGehitu`, `Eska_MahaiEsleitu` eta `Eska_Baieztatu`-ek
+  transakzioak erabiltzen dituzte (rollback egiten dute baliozkotzeak huts eginez gero).
 - WAL moduari esker, irakurketak (`PRODUCTOS_LISTA`, `RESERVA_LISTA`,
   `TICKET_OBTENER`, ...) lock gabe egin daitezke.
 - Defentsan justifikatzeko: ≤10 bezero eta idazketa laburrekin, taula bakoitzeko
@@ -184,7 +214,7 @@ lock (DatuBasea.IdazketaBlokeoa)   // ZerbitzariaTPV/Datuak/DatuBasea.cs
 
 ## 8. Izakinak eguneratze automatikoa
 
-`BtnKobratu_Click` → `PEDIDO_CONFIRMAR` → `Eska_Baieztatu` (osas 671-770):
+`BtnKobratu_Click` → `PEDIDO_CONFIRMAR` → `Eska_Baieztatu`:
 
 1. Eskaera irekita dagoela eta erabiltzailearena dela egiaztatu.
 2. Lerroak produktuka batu (`SUM(cantidad)`).
@@ -192,7 +222,9 @@ lock (DatuBasea.IdazketaBlokeoa)   // ZerbitzariaTPV/Datuak/DatuBasea.cs
    bertan behera utzi eta `Ez dago nahikoa izakin ... unitate geratzen dira` errorea itzuli.
 4. `UPDATE Producto SET stock = stock - @c` lerro bakoitzerako.
 5. Eskaera `cobrada` egoerara aldatu, `total` kalkulatu eta `commit`.
-6. Bezeroak `MenuaKargatu()` berriro deitzen du; `AGORTUTA` etiketa eguneratzen da.
+6. Mahia automatikoki libre bihurtzen da (`MESAS_LISTA`-k eskaera irekiak soilik
+   kontatzen dituelako okupatuta gisa).
+7. Bezeroak `MenuaKargatu()` berriro deitzen du; `AGORTUTA` etiketa eguneratzen da.
 
 Ticketa: `TICKET_OBTENER`-ek bezeroa, data, egoera, lerroak
 (`izena`, `kopurua`, `prezioUnitarioa`) eta guztira itzultzen ditu;
@@ -208,10 +240,16 @@ Ticketa: `TICKET_OBTENER`-ek bezeroa, data, egoera, lerroak
 
 ## 10. Probak eta hedapena
 
-`docs/PLAN.md` fitxategian 40 urratseko proben zerrenda dago:
+`docs/PLAN.md` fitxategian proben zerrenda dago:
 login, rol-guardak, erreserbak (data gabe/ekin, bikoiztuak, edukiera),
-eskaera, izakin-murrizketa, ticket-a, logout eta
-10 bezeroen muga.
+eskaera, izakin-murrizketa, ticket-a, logout,
+**eskaeraren berreskuratzea (saioa itxi/ireki, gailu berean eta bestean),
+jabetza-guardak, mahaiaren esleipena, mahaien mapa** eta 10 bezeroen muga.
+
+TCP smoke testak zuzenean zerbitzariaren aurka exekutatu dira: eskaera ireki +
+2 lerro + mahia esleitu → socket-a LOGOUT gabe itxi → berriro LOGIN →
+`PEDIDO_REKUPERATU` eskaera bera, mahia eta 2 osagai itzuli ditu; bestelako
+erabiltzaileari ukatuta, admin-ek bai; kobratu ondoren mahia librea.
 
 Windows VMrako argitalpena:
 
