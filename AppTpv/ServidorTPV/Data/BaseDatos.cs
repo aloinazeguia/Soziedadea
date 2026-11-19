@@ -63,6 +63,43 @@ public static class BaseDatos
             cmd.ExecuteNonQuery();
         }
 
+        // 15 usuarios de ejemplo: password "1234", rol 'usuario'
+        // (la UI muestra "Erabiltzailea" para ese rol)
+        string[] usuarios = {
+            "ane.azkue|Ane Azkue",
+            "iker.etxeberria|Iker Etxeberria",
+            "nerea.garai|Nerea Garai",
+            "jon.aranburu|Jon Aranburu",
+            "maddi.oiartzabal|Maddi Oiartzabal",
+            "gorka.larralde|Gorka Larralde",
+            "uxue.mendoza|Uxue Mendoza",
+            "asier.bengoa|Asier Bengoa",
+            "leire.sarobe|Leire Sarobe",
+            "eneko.iturbe|Eneko Iturbe",
+            "amets.salazar|Amets Salazar",
+            "ihintza.barandiaran|Ihintza Barandiaran",
+            "hodei.mintegi|Hodei Mintegi",
+            "eider.zabaleta|Eider Zabaleta",
+            "unai.berasategi|Unai Berasategi"
+        };
+        using (var cmd = con.CreateCommand())
+        {
+            cmd.CommandText = @"
+                INSERT OR IGNORE INTO Usuario (login, passHash, nombre, rol)
+                VALUES (@login, @hash, @nombre, 'usuario');";
+            var pLogin  = cmd.Parameters.Add("@login",  SqliteType.Text);
+            var pHash   = cmd.Parameters.Add("@hash",   SqliteType.Text);
+            var pNombre = cmd.Parameters.Add("@nombre", SqliteType.Text);
+            pHash.Value = Seguridad.HashPassword("1234");
+            foreach (var usuario in usuarios)
+            {
+                var partes = usuario.Split('|');
+                pLogin.Value  = partes[0];
+                pNombre.Value = partes[1];
+                cmd.ExecuteNonQuery();
+            }
+        }
+
         // Mesa(s) de ejemplo
         using (var cmd = con.CreateCommand())
         {

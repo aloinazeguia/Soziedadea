@@ -72,6 +72,11 @@ eta, fitxategia berria bada, haziak txertatzen ditu.
 ### Haziak (lehen abiaraztea)
 
 - `admin` / `admin123` — rola `admin`, izena `Administrador`.
+- 15 erabiltzaile (`1234` pasahitza, rola `usuario` → UI-an "Erabiltzailea"):
+  `ane.azkue`, `iker.etxeberria`, `nerea.garai`, `jon.aranburu`,
+  `maddi.oiartzabal`, `gorka.larralde`, `uxue.mendoza`, `asier.bengoa`,
+  `leire.sarobe`, `eneko.iturbe`, `amets.salazar`, `ihintza.barandiaran`,
+  `hodei.mintegi`, `eider.zabaleta`, `unai.berasategi`.
 - Mahaiak: 1 (4 plaza), 2 (4), 3 (6).
 - Produktuak: Kola kontxa (2,50 € / 24), Kalimotxo (3,00 € / 40),
   Prentxikoa (3,00 € / 12), Sakramento burger (6,50 € / 8).
