@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const listaCobro = document.getElementById('listaCobro');
 
     if (comandasPendientes.length === 0) {
-        listaCobro.innerHTML = '<li>No hay comandas pendientes por cobrar</li>';
+        listaCobro.innerHTML = '<li>Ez dago kobratzeko eskaerarik.</li>';
         return;
     }
 
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     comandasPendientes.forEach((comanda, index) => {
         const li = document.createElement('li');
         li.style.cursor = 'pointer';
-        li.textContent = `Comanda #${comanda.id} - Mesa: ${comanda.mesaId}`;
+        li.textContent = `Eskaera #${comanda.id} - Mahaia: ${comanda.mesaId}`;
         li.addEventListener('click', () => mostrarDetalleComanda(index));
         listaCobro.appendChild(li);
     });
@@ -22,8 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function mostrarDetalleComanda(indice) {
         const comanda = comandasPendientes[indice];
 
-        empresaDiv.textContent = comanda.sala || 'SALA DESCONOCIDA';
-        datosEmpresaDiv.textContent = `COMENSALES: ${comanda.comensales || 0}`;
+        empresaDiv.textContent = comanda.sala || 'ARETO EZEZAGUNA';
+        datosEmpresaDiv.textContent = `BEZEROAK: ${comanda.comensales || 0}`;
 
         listaCobro.innerHTML = '';
 
@@ -38,11 +38,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const totalItem = document.createElement(`li`);
         totalItem.style.fontWeight = 'bold';
-        totalItem.textContent = `TOTAL: ${total.toFixed(2)}€`;
+        totalItem.textContent = `GUZTIRA: ${total.toFixed(2)}€`;
         listaCobro.appendChild(totalItem);
 
         const botonCobrar = document.createElement('button');
-        botonCobrar.textContent = 'Cobrar comanda';
+        botonCobrar.textContent = 'Eskaera kobratu';
         botonCobrar.addEventListener('click', () => {
             comandasPendientes.aplice(indice, 1);
             localStorage.setItem('comandasPendientes', JSON.stringify(comandasPendientes));

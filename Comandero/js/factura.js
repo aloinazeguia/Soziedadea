@@ -16,7 +16,7 @@ async function mostrarPedidoDesdeAPI() {
 
     const mesaId = localStorage.getItem('mesaSeleccionada');
     if (!mesaId) {
-        lista.innerHTML = '<li>No hay mesa seleccionada.</li>';
+        lista.innerHTML = '<li>Ez da mahairik aukeratu.</li>';
         return;
     }
 
@@ -37,7 +37,7 @@ async function mostrarPedidoDesdeAPI() {
     }
 
     if (pedido.length === 0) {
-        lista.innerHTML = '<li>No hay productos en el pedido.</li>';
+        lista.innerHTML = '<li>Ez dago produkturik eskaeran.</li>';
         return;
     }
 
@@ -83,34 +83,34 @@ function calcularCuota(total) {
 
 function mostrarFechaYHora() {
     const ahora = new Date();
-    const formato = ahora.toLocaleString('es-ES');
+    const formato = ahora.toLocaleString('eu-ES');
     document.getElementById('fecha-hora').textContent = formato;
 }
 
 function mostrarInfoExtra() {
     const salaMesa = localStorage.getItem('mesaSeleccionada') || '';
     const formaPago = localStorage.getItem('formaPago') || 'Pago en efectivo';
-    document.getElementById('sala-mesa').textContent = "Mesa: "+salaMesa;
+    document.getElementById('sala-mesa').textContent = "Mahaia: "+salaMesa;
     document.getElementById('forma-pago').textContent = formaPago;
 }
 
 function generarQR() {
     const total = document.getElementById('total').textContent;
-    const textoQR = `Total factura: ${total} €`;
+    const textoQR = `Fakturaren guztizkoa: ${total} €`;
     const urlQR = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(textoQR)}&size=150x150`;
 
     const contenedorQR = document.getElementById('contenedorQR');
     contenedorQR.innerHTML = '';
     const imgQR = document.createElement('img');
     imgQR.src = urlQR;
-    imgQR.alt = 'Código QR del total';
+    imgQR.alt = 'Guztizkoaren QR kodea';
     contenedorQR.appendChild(imgQR);
 }
 
 async function imprimirTicket() {
     const ticket = document.getElementById('ticket');
     const ventanaImpresion = window.open('', '', 'width=600,height=400');
-    ventanaImpresion.document.write('<html><head><title>Ticket de compra</title></head><body>');
+    ventanaImpresion.document.write('<html lang="eu"><head><title>Erosketa-tiketa</title></head><body>');
     ventanaImpresion.document.write(ticket.innerHTML);
     ventanaImpresion.document.write('<style>body{font-family: Arial, sans-serif;}</style>');
     ventanaImpresion.document.close();
@@ -122,7 +122,7 @@ async function imprimirTicket() {
         await cerrarComandasYEliminarReserva(mesaId);
     }
 
-    AlertMessage('El ticket se ha impreso correctamente', '../../Salas_/sala1.html');
+    AlertMessage('Tiketa behar bezala inprimatu da.', '../../Salas_/sala1.html');
 }
 
 async function finalizarSinImprimir() {
@@ -130,7 +130,7 @@ async function finalizarSinImprimir() {
     if (mesaId) {
         await cerrarComandasYEliminarReserva(mesaId);
     }
-    AlertMessage('Operación finalizada sin imprimir', '../../Salas_/sala1.html');
+    AlertMessage('Eragiketa inprimatu gabe amaitu da.', '../../Salas_/sala1.html');
 }
 
 async function cerrarComandasYEliminarReserva(mesaId) {

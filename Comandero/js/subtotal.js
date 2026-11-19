@@ -16,7 +16,7 @@ async function mostrarPedidoEnFactura() {
 
     const mesaId = localStorage.getItem('mesaSeleccionada');
     if (!mesaId) {
-        lista.innerHTML = '<li>No hay mesa seleccionada.</li>';
+        lista.innerHTML = '<li>Ez da mahairik aukeratu.</li>';
         return;
     }
 
@@ -38,13 +38,13 @@ async function mostrarPedidoEnFactura() {
         }
     } catch (error) {
         console.error("Error al recuperar las comandas:", error);
-        lista.innerHTML = '<li>Error al cargar el pedido.</li>';
+        lista.innerHTML = '<li>Errorea eskaera kargatzean.</li>';
         return;
     }
 
     // Si no hay productos en el pedido
     if (!pedidoGuardado || pedidoGuardado.length === 0) {
-        lista.innerHTML = '<li>No hay productos en el pedido.</li>';
+        lista.innerHTML = '<li>Ez dago produkturik eskaeran.</li>';
         return;
     }
 
@@ -91,21 +91,21 @@ function calcularCuota(total) {
 
 function mostrarFechaYHora() {
     const ahora = new Date();
-    const formato = ahora.toLocaleString();
-    document.getElementById('fecha-hora').textContent = `Fecha y hora: ${formato}`;
+    const formato = ahora.toLocaleString('eu-ES');
+    document.getElementById('fecha-hora').textContent = `Data eta ordua: ${formato}`;
 }
 
 function mostrarInfoExtra() {
     const salaMesa = localStorage.getItem('salaMesa') || '';
     const formaPago = localStorage.getItem('formaPago') || '';
-    document.getElementById('sala-mesa').textContent = `Sala/Mesa: ${salaMesa}`;
-    document.getElementById('forma-pago').textContent = `Forma de pago: ${formaPago}`;
+    document.getElementById('sala-mesa').textContent = `Aretoa/mahaia: ${salaMesa}`;
+    document.getElementById('forma-pago').textContent = `Ordainketa modua: ${formaPago}`;
 }
 
 export function imprimirSub() {
     const ticket = document.getElementById('ticket');
     const ventanaImpresion = window.open('', '', 'width=600,height=400');
-    ventanaImpresion.document.write('<html><head><title>Ticket de compra</title></head><body>');
+    ventanaImpresion.document.write('<html lang="eu"><head><title>Erosketa-tiketa</title></head><body>');
     ventanaImpresion.document.write(ticket.innerHTML);
     ventanaImpresion.document.write('<style>body{font-family: Arial, sans-serif;}</style>');
     ventanaImpresion.document.close();
@@ -117,7 +117,7 @@ export function imprimirSub() {
     }, 1000);
 
     // Mensaje de confirmación y redirección
-    let message = 'El ticket se ha imprimido correctamente.';
+    let message = 'Tiketa behar bezala inprimatu da.';
     let redirection = "../../Salas_/sala1.html";
     AlertMessage(message, redirection);
 }

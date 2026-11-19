@@ -9,7 +9,7 @@ export function AlertMessage(message,redirection = null){
     p.textContent = message;
     //btn aceptar
     const btnAceptar = document.createElement('span');
-    btnAceptar.textContent = "ACEPTAR";
+    btnAceptar.textContent = "ONARTU";
     btnAceptar.classList.add("alertMessageBtnAceptar","alertBtn");
     btnAceptar.addEventListener('click',()=>{
         div.remove();
@@ -34,7 +34,7 @@ export function AlertConfirm(message,redirection = null){
         p.textContent = message;
         //btn aceptar
         const btnAceptar = document.createElement('span');
-        btnAceptar.textContent = "ACEPTAR";
+        btnAceptar.textContent = "ONARTU";
         btnAceptar.classList.add("alertMessageBtnAceptar_confirm","alertBtn");
         btnAceptar.addEventListener('click',()=>{
             div.remove();
@@ -45,7 +45,7 @@ export function AlertConfirm(message,redirection = null){
         });
         //btn cancelar
         const btnCancelar = document.createElement('span');
-        btnCancelar.textContent = "CANCELAR";
+        btnCancelar.textContent = "UTZI";
         btnCancelar.classList.add("alertMessageBtnCancelar","alertBtn");
         btnCancelar.addEventListener('click',()=>{
             div.remove();
@@ -83,7 +83,7 @@ export function AlertPrompt(message){
         
         //btn aceptar
         const btnAceptar = document.createElement('span');
-        btnAceptar.textContent = "ACEPTAR";
+        btnAceptar.textContent = "ONARTU";
         btnAceptar.classList.add("alertMessageBtnAceptar","alertBtn");
         btnAceptar.addEventListener('click',()=>{
             div.remove();
@@ -94,7 +94,7 @@ export function AlertPrompt(message){
         });
         //btn cancelar
         const btnCancelar = document.createElement('span');
-        btnAceptar.textContent = "CANCELAR";
+        btnCancelar.textContent = "UTZI";
         btnAceptar.classList.add("alertMessageBtnCancelar","alertBtn");
         btnCancelar.addEventListener('click',()=>{
             div.remove();

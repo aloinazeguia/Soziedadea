@@ -1,0 +1,354 @@
+<!-- ============================================================
+  AppTpv — Interfaz 2 de 5: CONSUMICIONES (comandero del TPV)
+  Diseno inspirado en Comandero/html/menu.html:
+    izquierda: CATEGORIAS (oscuro)
+    centro:   rejilla de produktuak de la kategoria
+    derecha:  PEDIDO (oscuro) konexioa Bidali, lerroak, guztira,
+              SUBTOTAL y COBRAR
+============================================================ -->
+<UserControl x:Class="BezeroaWPF.Ikuspegiak.KontsumizioIkuspegia"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        FontFamily="Arial">
+    <UserControl.Resources>
+
+        <!-- Boton redondeado del comandero (estilo .subtotal-btn / .cobrar-btn) -->
+        <Style x:Key="KomanderoBotoia" TargetType="Button">
+            <Setter Property="Background" Value="#D8D8D8"/>
+            <Setter Property="Foreground" Value="#2E3440"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="hondoa" Background="{TemplateBinding Background}"
+                                CornerRadius="6" Padding="10,4">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="hondoa" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="hondoa" Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="hondoa" Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Boton pequeno del editor de lerroak (estilo .editor button) -->
+        <Style x:Key="EditoreBotoia" TargetType="Button">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#2E3440"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="hondoa" Background="{TemplateBinding Background}"
+                                CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="hondoa" Property="Background" Value="#E7E7E7"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Elemento de la zerrenda de kategoriak (sidebar) -->
+        <Style x:Key="KategoriaElementua" TargetType="ListBoxItem">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="Padding" Value="16,14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="hondoa" Background="Transparent"
+                                BorderBrush="#556F6F6F" BorderThickness="0,0,0,1"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="hondoa" Property="Background" Value="#3B4252"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="hondoa" Property="Background" Value="#4C566A"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Tarjeta de produktua (estilo .produktuak del menu.html) -->
+        <Style x:Key="ProduktuTxartela" TargetType="Button">
+            <Setter Property="Background" Value="#E7E7E7"/>
+            <Setter Property="Foreground" Value="#2E3440"/>
+            <Setter Property="Width" Value="210"/>
+            <Setter Property="MinHeight" Value="150"/>
+            <Setter Property="Margin" Value="8"/>
+            <Setter Property="Padding" Value="20,14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="hondoa" Background="{TemplateBinding Background}"
+                                CornerRadius="15" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Stretch"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="hondoa" Property="Background" Value="#D8D8D8"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="hondoa" Property="Background" Value="#C7C7C7"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Elemento de la zerrenda del pedido (sin resaltado azul de seleccion) -->
+        <Style x:Key="EskaeraLerroElementua" TargetType="ListBoxItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <ContentPresenter/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="360"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ============ CATEGORIAS ============ -->
+        <DockPanel Grid.Column="0" Background="#2E3440">
+            <TextBlock DockPanel.Dock="Top" Text="KATEGORIAK"
+                       Foreground="White" FontSize="20" FontWeight="Bold"
+                       HorizontalAlignment="Center" Margin="10,20,10,0"/>
+            <Border DockPanel.Dock="Top" Height="1" Background="White"
+                    Margin="10,10,10,12"/>
+            <ListBox x:Name="ListaKategoriak" Background="Transparent"
+                     BorderThickness="0"
+                     ItemContainerStyle="{StaticResource KategoriaElementua}"
+                     SelectionChanged="ListaKategoriak_SelectionChanged"/>
+        </DockPanel>
+
+        <!-- ============ PRODUCTOS ============ -->
+        <DockPanel Grid.Column="1" Background="White">
+            <TextBlock DockPanel.Dock="Top" x:Name="TxtKategoriaIzenburua"
+                       Text="PRODUKTUAK" FontSize="18" FontWeight="Bold"
+                       Foreground="#2E3440" Margin="22,18,22,0"/>
+            <TextBlock DockPanel.Dock="Bottom" x:Name="TxtMenuInfo"
+                       Foreground="Gray" FontSize="12" TextWrapping="Wrap"
+                       Margin="22,6,22,12"/>
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl x:Name="ListaProduktuak" Margin="12"
+                              MaxWidth="1080" HorizontalAlignment="Center">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Style="{StaticResource ProduktuTxartela}"
+                                    Tag="{Binding}" Click="Produktua_Click">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Izena}"
+                                               FontSize="22" FontWeight="Bold"
+                                               TextAlignment="Center" TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding Prezioa, StringFormat={}{0:0.00} €}"
+                                               FontSize="18" FontWeight="Bold"
+                                               HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                                    <TextBlock FontSize="12" HorizontalAlignment="Center"
+                                               Margin="0,6,0,0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text"
+                                                        Value="{Binding Izakinak, StringFormat=izakinak: {0}}"/>
+                                                <Setter Property="Foreground" Value="#777777"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Agortuta}" Value="True">
+                                                        <Setter Property="Text" Value="AGORTUTA"/>
+                                                        <Setter Property="Foreground" Value="Red"/>
+                                                        <Setter Property="FontWeight" Value="Bold"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </DockPanel>
+
+        <!-- ============ PEDIDO ============ -->
+        <Grid Grid.Column="2" Background="#2E3440">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Cabecera: Bidali + PEDIDO (estilo .pedido-header) -->
+            <Grid Grid.Row="0" Margin="20,20,20,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="BtnBidali" Grid.Column="0" Content="Bidali"
+                        HorizontalAlignment="Stretch" Margin="0,0,24,0"
+                        Height="48" FontSize="18"
+                        Style="{StaticResource KomanderoBotoia}"
+                        Background="#6FC16E" Click="BtnBidali_Click"/>
+                <Border Grid.Column="1" BorderThickness="0,0,0,1" BorderBrush="White"
+                        Padding="0,0,0,10" VerticalAlignment="Center">
+                    <TextBlock Text="ESKAERA" Foreground="White"
+                               FontSize="24" FontWeight="Bold"/>
+                </Border>
+            </Grid>
+            <!-- Mahaiaren hautaketa: eskaera irekia mahaiari lotzen zaio kobratu arte -->
+            <StackPanel Grid.Row="1" Margin="20,8,20,0">
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" x:Name="BtnMahiaEsleitu"
+                            Content="Esleitu" Width="62" Height="26" FontSize="11"
+                            Style="{StaticResource KomanderoBotoia}"
+                            Background="#7FA8D6" Click="BtnMahiaEsleitu_Click"/>
+                    <ComboBox x:Name="CboMahaiak" Height="26" FontSize="12"
+                              DisplayMemberPath="Deskribapena" SelectedValuePath="Id"
+                              Margin="0,0,8,0"/>
+                </DockPanel>
+                <TextBlock x:Name="TxtEskaeraEgoera" Text="Ez dago eskaera irekirik"
+                           Foreground="#B8BFC9" FontSize="11"
+                           HorizontalAlignment="Center" Margin="0,6,0,0"/>
+            </StackPanel>
+
+            <!-- Lineas del pedido -->
+            <ListBox x:Name="ListaEskaera" Grid.Row="2" Margin="20,0,20,0"
+                     Background="Transparent" BorderThickness="0"
+                     ItemContainerStyle="{StaticResource EskaeraLerroElementua}"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     SelectionChanged="ListaEskaera_SelectionChanged">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border CornerRadius="10" Padding="8,6" Margin="0,3">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <!-- zain: naranja (.produktua-noenviado) -->
+                                    <Setter Property="Background" Value="#FFE0B2"/>
+                                    <Style.Triggers>
+                                        <!-- enviado: verde (.produktua-enviado) -->
+                                        <DataTrigger Binding="{Binding Egoera}" Value="bidalita">
+                                            <Setter Property="Background" Value="#B6E7A6"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Izena}" Foreground="#333333"
+                                           FontSize="15" FontWeight="Bold"
+                                           TextAlignment="Center" TextWrapping="Wrap"/>
+                                <StackPanel Orientation="Horizontal"
+                                            HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding Kopurua, StringFormat=x{0}}"
+                                               Foreground="#333333" FontSize="14"/>
+                                    <TextBlock Text=" - " Foreground="#333333" FontSize="14"/>
+                                    <TextBlock Text="{Binding Zenbatekoa, StringFormat={}{0:0.00} €}"
+                                               Foreground="#333333" FontSize="14"
+                                               FontWeight="Bold"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <!-- Editor de kopurua (estilo .editor) -->
+            <Border x:Name="EditorePanela" Grid.Row="3" Background="#828282"
+                    CornerRadius="10" Padding="10" Margin="20,8,20,0"
+                    MinHeight="72" Visibility="Collapsed">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                    <TextBox x:Name="TxtKopuruEditorea" Width="80" Height="48"
+                             VerticalContentAlignment="Center" TextAlignment="Center"
+                             FontSize="16" FontWeight="Bold"
+                             BorderThickness="0"/>
+                    <Button Content="Gorde" Margin="10,0,0,0"
+                            Style="{StaticResource EditoreBotoia}"
+                            Click="BtnGordeLerroa_Click"/>
+                    <Button Content="Ezabatu" Margin="10,0,0,0"
+                            Style="{StaticResource EditoreBotoia}"
+                            Click="BtnEzabatuLerroa_Click"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Guztira (estilo .guztira) -->
+            <Border Grid.Row="4" Background="#C76D3A" CornerRadius="5"
+                    Padding="10" Margin="20,10,20,0">
+                <Grid>
+                    <TextBlock Text="GUZTIRA:" Foreground="White" FontWeight="Bold"
+                               FontSize="16"/>
+                    <TextBlock x:Name="TxtTotal" Text="0.00 €" Foreground="White"
+                               FontWeight="Bold" FontSize="16"
+                               HorizontalAlignment="Right"/>
+                </Grid>
+            </Border>
+
+            <!-- Botones -->
+            <StackPanel Grid.Row="5" Margin="20,10,20,20">
+                <Button x:Name="BtnAzpitotala" Content="AZPITOTALA"
+                        Style="{StaticResource KomanderoBotoia}"
+                        Click="BtnAzpitotala_Click"/>
+                <Button x:Name="BtnKobratu" Content="KOBRATU" Margin="0,8,0,0"
+                        Style="{StaticResource KomanderoBotoia}"
+                        Click="BtnKobratu_Click"/>
+                <Button x:Name="BtnTxartela" Content="IKUSI TIKETA" Margin="0,8,0,0"
+                        Height="30" FontSize="12"
+                        Style="{StaticResource KomanderoBotoia}"
+                        Click="BtnTxartela_Click"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

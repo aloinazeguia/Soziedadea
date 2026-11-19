@@ -14,7 +14,7 @@ function FechaReserva() {
         // Mostrar el div de selección de mesa
         document.getElementById("sala1").style.display = "block";
       } else {
-        alert("❌ No hay disponibilidad para esta fecha y número de personas.");
+        alert("❌ Ez dago lekurik data eta pertsona kopuru horretarako.");
       }
     })
     .catch(error => {

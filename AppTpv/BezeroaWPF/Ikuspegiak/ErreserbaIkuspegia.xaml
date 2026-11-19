@@ -1,0 +1,78 @@
+<!-- ============================================================
+  AppTpv — Interfaz 3 de 5: RESERVAS (requisito 1.5)
+  Mesa + txanda bazkaria/afaria + pertsonak; la data es OPCIONAL
+  (vacia = reserva sin data) y duple mahia/data/txanda la filtra
+  el servidor.
+============================================================ -->
+<UserControl x:Class="BezeroaWPF.Ikuspegiak.ErreserbaIkuspegia"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- FORM -->
+        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+            <TextBlock Text="Erreserba berria / aldatu" FontSize="15"
+                       FontWeight="Bold" Margin="0,0,0,10"/>
+
+            <TextBlock Text="Mahaia:"/>
+            <ComboBox x:Name="CboMahia" Margin="0,2,0,10"
+                      DisplayMemberPath="Deskribapena" SelectedValuePath="Id"/>
+
+            <TextBlock Text="Txanda:"/>
+            <ComboBox x:Name="CboTxanda" Margin="0,2,0,10" SelectedIndex="0">
+                <ComboBoxItem Content="bazkaria"/>
+                <ComboBoxItem Content="afaria"/>
+            </ComboBox>
+
+            <TextBlock Text="Pertsona kopurua:"/>
+            <TextBox x:Name="TxtPertsonak" Text="2" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Data (YYYY-MM-DD; hutsik = datarik gabe):"/>
+            <TextBox x:Name="TxtData" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Bezeroaren izena:"/>
+            <TextBox x:Name="TxtBezeroa" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Oharrak (aukerakoa):"/>
+            <TextBox x:Name="TxtOharrak" Margin="0,2,0,10"/>
+
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="BtnSortu" Content="Sortu" Width="90"
+                        Background="#2E7D32" Foreground="White" Click="BtnSortu_Click"/>
+                <Button x:Name="BtnAldatu" Content="Aldatu" Width="90" Margin="6,0,0,0"
+                        Click="BtnAldatu_Click"/>
+                <Button x:Name="BtnDesgaitu" Content="Utzi erreserba" Width="110" Margin="6,0,0,0"
+                        Click="BtnDesgaitu_Click"/>
+            </StackPanel>
+            <TextBlock x:Name="TxtAbisua" Foreground="Red" TextWrapping="Wrap" Margin="0,8,0,0"/>
+        </StackPanel>
+
+        <!-- LISTA -->
+        <DockPanel Grid.Column="1">
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Text="Erreserba aktiboak" FontSize="15" FontWeight="Bold"
+                           VerticalAlignment="Center"/>
+                <TextBlock Text="  data-iragazkia (hutsik = guztiak): " VerticalAlignment="Center"/>
+                <TextBox x:Name="TxtDataIragazkia" Width="100"/>
+                <Button x:Name="BtnEguneratu" Content="Eguneratu" Width="90" Margin="8,0,0,0"
+                        Click="BtnEguneratu_Click"/>
+            </StackPanel>
+            <DataGrid x:Name="GridErreserbak" AutoGenerateColumns="False" IsReadOnly="True"
+                      SelectionChanged="GridErreserbak_SelectionChanged">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding ErreserbaId}" Width="40"/>
+                    <DataGridTextColumn Header="Mahaia" Binding="{Binding MahaiZenbakia}" Width="60"/>
+                    <DataGridTextColumn Header="Data" Binding="{Binding DataErakutsi}" Width="110"/>
+                    <DataGridTextColumn Header="Txanda" Binding="{Binding Txanda}" Width="80"/>
+                    <DataGridTextColumn Header="Pertsonak" Binding="{Binding PertsonaKopurua}" Width="80"/>
+                    <DataGridTextColumn Header="Bezeroa" Binding="{Binding BezeroIzena}" Width="*"/>
+                    <DataGridTextColumn Header="Oharrak" Binding="{Binding Oharrak}" Width="150"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+    </Grid>
+</UserControl>

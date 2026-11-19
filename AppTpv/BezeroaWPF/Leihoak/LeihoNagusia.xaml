@@ -1,0 +1,44 @@
+<!-- ============================================================
+  AppTpv — Leiho nagusia: 6 fitxa
+    1. Kontsumizioak (komanderoa, erabiltzaile guztiek)
+    2. Erreserbak (erabiltzaile guztiek)
+    3. Mahaiak (mapa: librea / erreserbatuta / okupatuta)
+    4. Erabiltzaileen administrazioa (admin soilik)
+    5. Izakinen/cartaren administrazioa (admin soilik)
+============================================================ -->
+<Window x:Class="BezeroaWPF.Leihoak.LeihoNagusia"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vistas="clr-namespace:BezeroaWPF.Ikuspegiak"
+        Title="AppTpv" Height="800" Width="1280"
+        MinHeight="640" MinWidth="1024"
+        WindowStartupLocation="CenterScreen">
+    <DockPanel>
+        <!-- barra superior konexioa la identidad del usuario -->
+        <Border DockPanel.Dock="Top" Background="#EEEEEE" Padding="10,6">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" x:Name="BtnIrten" Content="Amaitu saioa"
+                        Click="BtnIrten_Click" Width="110"/>
+                <TextBlock x:Name="TxtNorea" FontWeight="Bold" VerticalAlignment="Center"/>
+            </DockPanel>
+        </Border>
+
+        <TabControl x:Name="Fitxak">
+            <TabItem Header="Kontsumizioak" Tag="Kontsumizioak">
+                <vistas:KontsumizioIkuspegia/>
+            </TabItem>
+            <TabItem Header="Erreserbak" Tag="Erreserbak">
+                <vistas:ErreserbaIkuspegia/>
+            </TabItem>
+            <TabItem Header="Mahaiak" Tag="Mahaiak">
+                <vistas:MahaiMapaIkuspegia/>
+            </TabItem>
+            <TabItem Header="Erabiltzaileak" Tag="Erabiltzaileak">
+                <vistas:ErabiltzaileIkuspegia/>
+            </TabItem>
+            <TabItem Header="Izakinak" Tag="Izakinak">
+                <vistas:IzakinIkuspegia/>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>
