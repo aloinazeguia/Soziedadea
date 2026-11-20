@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "ZerbitzariaTPV\\ZerbitzariaTPV.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "BezeroaWPF\\BezeroaWPF.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
